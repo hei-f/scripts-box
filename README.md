@@ -91,9 +91,9 @@ pub trait Script: Send + Sync {
 
 脚本配置存储在应用配置目录的 `scripts.json` 文件中：
 
-- macOS: `~/Library/Application Support/com.lyj.scripts-box/`
-- Windows: `%APPDATA%\com.lyj.scripts-box\`
-- Linux: `~/.config/com.lyj.scripts-box/`
+- macOS: `~/Library/Application Support/io.github.hei-f.scripts-box/`
+- Windows: `%APPDATA%\io.github.hei-f.scripts-box\`
+- Linux: `~/.config/io.github.hei-f.scripts-box/`
 
 ## 许可证
 
