@@ -2,8 +2,10 @@ name: Release Desktop App
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'feat/yl_0.1.0'
+    # tags:
+    #   - 'v*'
 
 permissions:
   contents: write
@@ -23,14 +25,13 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
+      - name: 安装 bun
+        uses: oven-sh/setup-bun@v1
+
       - name: 安装 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'bun'
-
-      - name: 安装 bun
-        uses: oven-sh/setup-bun@v1
 
       - name: 安装依赖
         run: bun install
@@ -64,14 +65,13 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
+      - name: 安装 bun
+        uses: oven-sh/setup-bun@v1
+
       - name: 安装 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'bun'
-
-      - name: 安装 bun
-        uses: oven-sh/setup-bun@v1
 
       - name: 安装依赖
         run: bun install
