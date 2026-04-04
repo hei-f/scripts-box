@@ -2,10 +2,8 @@ name: Release Desktop App
 
 on:
   push:
-    branches:
-      - 'feat/yl_0.1.0'
-    # tags:
-    #   - 'v*'
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -79,12 +77,6 @@ jobs:
       - name: 构建 Tauri 应用
         run: bun run tauri build
 
-      - name: 上传 Windows .msi 产物
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-msi
-          path: src-tauri/target/release/bundle/msi/*.msi
-
       - name: 上传 Windows .exe 产物
         uses: actions/upload-artifact@v4
         with:
@@ -107,12 +99,6 @@ jobs:
           name: macos-dmg
           path: artifacts/macos-dmg
 
-      - name: 下载 Windows .msi 产物
-        uses: actions/download-artifact@v4
-        with:
-          name: windows-msi
-          path: artifacts/windows-msi
-
       - name: 下载 Windows .exe 产物
         uses: actions/download-artifact@v4
         with:
@@ -125,6 +111,5 @@ jobs:
           files: |
             artifacts/macos-app/*.app
             artifacts/macos-dmg/*.dmg
-            artifacts/windows-msi/*.msi
             artifacts/windows-exe/*.exe
           generate_release_notes: true
