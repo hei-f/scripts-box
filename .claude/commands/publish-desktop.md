@@ -422,7 +422,6 @@ Rust 编译检查结果：
 检查生成的构建产物是否完整：
 
 **macOS 产物**：
-- `.app` 文件：检查 `src-tauri/target/release/bundle/macos/` 目录
 - `.dmg` 文件：检查 `src-tauri/target/release/bundle/dmg/` 目录
 
 **Windows 产物**：
@@ -499,7 +498,7 @@ git commit -m "docs: 更新项目文档"
 - 访问 GitHub 仓库的 Releases 页面
 - 确认新版本 Release 已创建
 - 确认产物已上传：
-  - macOS：`.app` 和 `.dmg` 文件
+  - macOS：`.dmg` 文件
   - Windows：`.exe` 文件（NSIS 安装包）
 
 **12.4 处理构建失败**
@@ -572,6 +571,5 @@ git commit -m "docs: 更新项目文档"
 
 | 平台 | 产物类型 | 目录路径 |
 |------|----------|----------|
-| macOS | `.app` | `src-tauri/target/release/bundle/macos/` |
 | macOS | `.dmg` | `src-tauri/target/release/bundle/dmg/` |
 | Windows | `.exe` | `src-tauri/target/release/bundle/nsis/` |
