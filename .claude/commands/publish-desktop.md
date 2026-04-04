@@ -426,8 +426,7 @@ Rust 编译检查结果：
 - `.dmg` 文件：检查 `src-tauri/target/release/bundle/dmg/` 目录
 
 **Windows 产物**：
-- `.msi` 文件：检查 `src-tauri/target/release/bundle/msi/` 目录
-- `.exe` 文件：检查 `src-tauri/target/release/bundle/nsis/` 目录
+- `.exe` 文件：检查 `src-tauri/target/release/bundle/nsis/` 目录（NSIS 安装包）
 
 **验证要点**：
 - 确认产物文件存在
@@ -501,7 +500,7 @@ git commit -m "docs: 更新项目文档"
 - 确认新版本 Release 已创建
 - 确认产物已上传：
   - macOS：`.app` 和 `.dmg` 文件
-  - Windows：`.msi` 和 `.exe` 文件
+  - Windows：`.exe` 文件（NSIS 安装包）
 
 **12.4 处理构建失败**
 
@@ -575,5 +574,4 @@ git commit -m "docs: 更新项目文档"
 |------|----------|----------|
 | macOS | `.app` | `src-tauri/target/release/bundle/macos/` |
 | macOS | `.dmg` | `src-tauri/target/release/bundle/dmg/` |
-| Windows | `.msi` | `src-tauri/target/release/bundle/msi/` |
 | Windows | `.exe` | `src-tauri/target/release/bundle/nsis/` |
