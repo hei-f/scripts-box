@@ -78,7 +78,7 @@ function getSelectOptions(paramType: ParamDefinition['type']): { label: string; 
  * 内置脚本列表页面组件
  */
 const BuiltinScriptsPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [executeModalVisible, setExecuteModalVisible] = useState(false);
   const [selectedScript, setSelectedScript] = useState<ScriptInfo | null>(null);

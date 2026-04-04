@@ -85,7 +85,7 @@ const formatDuration = (durationMs?: number): string => {
  * - 实现清空历史功能
  */
 const HistoryPage: React.FC = () => {
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ExecutionRecord | null>(null);
   const [clearLoading, setClearLoading] = useState(false);
