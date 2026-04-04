@@ -1,0 +1,130 @@
+name: Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 缓存 Rust 编译产物
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'bun'
+
+      - name: 安装 bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: 安装依赖
+        run: bun install
+
+      - name: 构建 Tauri 应用
+        run: bun run tauri build
+
+      - name: 上传 macOS .app 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: src-tauri/target/release/bundle/macos/*.app
+
+      - name: 上传 macOS .dmg 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 缓存 Rust 编译产物
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'bun'
+
+      - name: 安装 bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: 安装依赖
+        run: bun install
+
+      - name: 构建 Tauri 应用
+        run: bun run tauri build
+
+      - name: 上传 Windows .msi 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-msi
+          path: src-tauri/target/release/bundle/msi/*.msi
+
+      - name: 上传 Windows .exe 产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: src-tauri/target/release/bundle/nsis/*.exe
+
+  release:
+    needs: [build-macos, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: 下载 macOS .app 产物
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-app
+          path: artifacts/macos-app
+
+      - name: 下载 macOS .dmg 产物
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dmg
+          path: artifacts/macos-dmg
+
+      - name: 下载 Windows .msi 产物
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-msi
+          path: artifacts/windows-msi
+
+      - name: 下载 Windows .exe 产物
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: artifacts/windows-exe
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/macos-app/*.app
+            artifacts/macos-dmg/*.dmg
+            artifacts/windows-msi/*.msi
+            artifacts/windows-exe/*.exe
+          generate_release_notes: true
