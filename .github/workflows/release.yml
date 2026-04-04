@@ -2,10 +2,8 @@ name: Release Desktop App
 
 on:
   push:
-    branches:
-      - 'feat/yl_0.1.0'
-    # tags:
-    #   - 'v*'
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
