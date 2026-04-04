@@ -87,6 +87,43 @@ jobs:
     needs: [build-macos, build-windows]
     runs-on: ubuntu-latest
     steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 获取上一个 tag
+        id: prev-tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "prev_tag=${PREV_TAG}" >> $GITHUB_OUTPUT
+
+      - name: 生成 Release Notes
+        id: notes
+        run: |
+          VERSION=${{ github.ref_name }}
+          PREV_TAG=${{ steps.prev-tag.outputs.prev_tag }}
+
+          # 生成 changelog
+          if [ -n "$PREV_TAG" ]; then
+            CHANGELOG=$(git log ${PREV_TAG}..HEAD --oneline --no-merges | head -20)
+          else
+            CHANGELOG=$(git log --oneline --no-merges | head -20)
+          fi
+
+          # 写入文件（用于多行内容）
+          echo "## 更改日志" > release_notes.md
+          echo "" >> release_notes.md
+          echo "$CHANGELOG" | while read line; do
+            echo "- $line" >> release_notes.md
+          done
+          echo "" >> release_notes.md
+          echo "---" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**下载链接**：" >> release_notes.md
+          echo "- macOS: \`.dmg\` 安装包" >> release_notes.md
+          echo "- Windows: \`.exe\` 安装包" >> release_notes.md
+
       - name: 下载 macOS .app 产物
         uses: actions/download-artifact@v4
         with:
@@ -112,4 +149,5 @@ jobs:
             artifacts/macos-app/*.app
             artifacts/macos-dmg/*.dmg
             artifacts/windows-exe/*.exe
+          body_path: release_notes.md
           generate_release_notes: true
