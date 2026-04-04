@@ -4,15 +4,15 @@
 
 ## 技术栈
 
-- **后端**: Rust + Tauri v2
-- **前端**: React + TypeScript + Ant Design 6
+- **核心层**: Rust + Tauri v2
+- **UI 层**: React + TypeScript + Ant Design 6
 - **数据存储**: SQLite + JSON 配置文件
 
 ## 项目结构
 
 ```
 scripts-box/
-├── src-tauri/          # Rust 后端
+├── src-tauri/          # Rust 核心层
 │   ├── src/
 │   │   ├── builtin/    # 内置脚本实现
 │   │   ├── commands/   # Tauri 命令
@@ -22,7 +22,7 @@ scripts-box/
 │   │   ├── registry.rs # 脚本注册中心
 │   │   └── error.rs    # 错误类型定义
 │   └── Cargo.toml
-├── src/                # React 前端
+├── src/                # React UI 层
 │   ├── components/     # 通用组件
 │   ├── pages/          # 页面组件
 │   ├── services/       # Tauri 服务层
