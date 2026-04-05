@@ -41,9 +41,8 @@ impl AppConfigManager {
 
         // 确保配置目录存在
         if !config_dir.exists() {
-            fs::create_dir_all(&config_dir).map_err(|e| {
-                AppError::ConfigError(format!("创建配置目录失败: {}", e))
-            })?;
+            fs::create_dir_all(&config_dir)
+                .map_err(|e| AppError::ConfigError(format!("创建配置目录失败: {}", e)))?;
         }
 
         // 构建配置文件路径
@@ -52,9 +51,8 @@ impl AppConfigManager {
         // 加载或创建配置文件
         let config = if config_path.exists() {
             // 读取配置文件
-            let content = fs::read_to_string(&config_path).map_err(|e| {
-                AppError::ConfigError(format!("读取应用配置文件失败: {}", e))
-            })?;
+            let content = fs::read_to_string(&config_path)
+                .map_err(|e| AppError::ConfigError(format!("读取应用配置文件失败: {}", e)))?;
 
             // 解析配置文件，失败时使用默认配置
             serde_json::from_str(&content).unwrap_or_else(|e| {
@@ -67,13 +65,10 @@ impl AppConfigManager {
 
             // 保存默认配置到文件
             let content = serde_json::to_string_pretty(&default_config)
-                .map_err(|e| {
-                    AppError::ConfigError(format!("序列化默认应用配置失败: {}", e))
-                })?;
+                .map_err(|e| AppError::ConfigError(format!("序列化默认应用配置失败: {}", e)))?;
 
-            fs::write(&config_path, &content).map_err(|e| {
-                AppError::ConfigError(format!("写入默认应用配置文件失败: {}", e))
-            })?;
+            fs::write(&config_path, &content)
+                .map_err(|e| AppError::ConfigError(format!("写入默认应用配置文件失败: {}", e)))?;
 
             default_config
         };
@@ -90,14 +85,12 @@ impl AppConfigManager {
     /// 成功返回 Ok(())，失败返回 AppError
     pub fn save(&self) -> Result<(), AppError> {
         // 序列化配置
-        let content = serde_json::to_string_pretty(&self.config).map_err(|e| {
-            AppError::ConfigError(format!("序列化应用配置失败: {}", e))
-        })?;
+        let content = serde_json::to_string_pretty(&self.config)
+            .map_err(|e| AppError::ConfigError(format!("序列化应用配置失败: {}", e)))?;
 
         // 写入配置文件
-        fs::write(&self.config_path, &content).map_err(|e| {
-            AppError::ConfigError(format!("写入应用配置文件失败: {}", e))
-        })?;
+        fs::write(&self.config_path, &content)
+            .map_err(|e| AppError::ConfigError(format!("写入应用配置文件失败: {}", e)))?;
 
         Ok(())
     }
@@ -164,10 +157,7 @@ mod tests {
     }
 
     /// 创建测试用的 AppConfigManager（带自定义配置）
-    fn create_test_manager_with_config(
-        temp_dir: &TempDir,
-        config: AppConfig,
-    ) -> AppConfigManager {
+    fn create_test_manager_with_config(temp_dir: &TempDir, config: AppConfig) -> AppConfigManager {
         let config_path = temp_dir.path().join(APP_CONFIG_FILE);
         AppConfigManager {
             config_path,
@@ -399,7 +389,11 @@ mod tests {
     #[test]
     fn test_save_to_nonexistent_directory() {
         let temp_dir = TempDir::new().unwrap();
-        let nonexistent_path = temp_dir.path().join("nonexistent").join("subdir").join("config.json");
+        let nonexistent_path = temp_dir
+            .path()
+            .join("nonexistent")
+            .join("subdir")
+            .join("config.json");
 
         let manager = AppConfigManager {
             config_path: nonexistent_path.clone(),

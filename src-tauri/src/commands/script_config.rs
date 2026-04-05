@@ -28,17 +28,17 @@ pub fn list_script_configs(
     registry_state: State<'_, Mutex<ScriptRegistry>>,
 ) -> Result<Vec<ScriptConfig>, AppError> {
     // 获取配置管理器中的脚本配置
-    let config_manager = config_state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
-    })?;
+    let config_manager = config_state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取配置管理器锁失败: {}", e)))?;
     let mut scripts: Vec<ScriptConfig> = config_manager.list_scripts().to_vec();
     drop(config_manager); // 释放锁
 
     // 获取脚本注册中心中的内置脚本
-    let registry = registry_state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取脚本注册中心锁失败: {}", e))
-    })?;
-    
+    let registry = registry_state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取脚本注册中心锁失败: {}", e)))?;
+
     // 合并内置脚本（如果配置管理器中不存在则添加）
     for script in registry.list() {
         // 检查是否已存在相同 ID 的脚本配置
@@ -76,9 +76,9 @@ pub fn get_script_config(
     id: String,
     state: State<'_, Mutex<ScriptConfigManager>>,
 ) -> Result<ScriptConfig, AppError> {
-    let manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
-    })?;
+    let manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取配置管理器锁失败: {}", e)))?;
 
     manager
         .get_script(&id)
@@ -101,9 +101,9 @@ pub fn create_script_config(
     config: ScriptConfig,
     state: State<'_, Mutex<ScriptConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取配置管理器锁失败: {}", e)))?;
 
     // 添加脚本配置
     manager.add_script(config)?;
@@ -131,9 +131,9 @@ pub fn update_script_config(
     config: ScriptConfig,
     state: State<'_, Mutex<ScriptConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取配置管理器锁失败: {}", e)))?;
 
     // 更新脚本配置
     manager.update_script(&id, config)?;
@@ -159,9 +159,9 @@ pub fn delete_script_config(
     id: String,
     state: State<'_, Mutex<ScriptConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取配置管理器锁失败: {}", e)))?;
 
     // 删除脚本配置
     manager.delete_script(&id)?;

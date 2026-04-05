@@ -43,7 +43,9 @@ pub fn log_frontend_error(
         created_at,
     };
 
-    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.insert_error_log(log)
 }
 
@@ -61,7 +63,9 @@ pub fn list_error_logs(
     db: State<'_, Mutex<Database>>,
 ) -> Result<Vec<ErrorLog>, AppError> {
     let limit = limit.unwrap_or(100);
-    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.list_error_logs(limit)
 }
 
@@ -74,7 +78,9 @@ pub fn list_error_logs(
 /// 成功返回 ()，失败返回 AppError
 #[tauri::command]
 pub fn clear_error_logs(db: State<'_, Mutex<Database>>) -> Result<(), AppError> {
-    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.clear_error_logs()
 }
 
@@ -94,7 +100,9 @@ pub fn cleanup_old_error_logs(
     db: State<'_, Mutex<Database>>,
 ) -> Result<usize, AppError> {
     let days = days_to_keep.unwrap_or(7);
-    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.cleanup_old_error_logs(days)
 }
 
@@ -110,11 +118,7 @@ pub fn cleanup_old_error_logs(
 /// # 返回
 /// 成功返回 ()，失败返回 AppError
 #[tauri::command]
-pub fn write_debug_log(
-    tag: String,
-    data: String,
-    app_handle: AppHandle,
-) -> Result<(), AppError> {
+pub fn write_debug_log(tag: String, data: String, app_handle: AppHandle) -> Result<(), AppError> {
     use std::io::{Error as IoError, ErrorKind};
 
     let config_dir = app_handle
@@ -199,12 +203,16 @@ pub fn read_debug_log(app_handle: AppHandle) -> Result<String, AppError> {
 #[tauri::command]
 pub fn open_devtools_window(app_handle: AppHandle) -> Result<(), AppError> {
     use crate::constants::DEVTOOLS_WINDOW_LABEL;
-    use tauri::Manager;
     use std::io::{Error as IoError, ErrorKind};
+    use tauri::Manager;
 
     if let Some(window) = app_handle.get_webview_window(DEVTOOLS_WINDOW_LABEL) {
-        window.show().map_err(|e| IoError::new(ErrorKind::Other, format!("显示窗口失败: {}", e)))?;
-        window.set_focus().map_err(|e| IoError::new(ErrorKind::Other, format!("聚焦窗口失败: {}", e)))?;
+        window
+            .show()
+            .map_err(|e| IoError::new(ErrorKind::Other, format!("显示窗口失败: {}", e)))?;
+        window
+            .set_focus()
+            .map_err(|e| IoError::new(ErrorKind::Other, format!("聚焦窗口失败: {}", e)))?;
     }
     // 如果窗口不存在，Tauri 会根据 tauri.conf.json 配置自动创建
 
@@ -221,19 +229,18 @@ pub fn open_devtools_window(app_handle: AppHandle) -> Result<(), AppError> {
 /// # 返回
 /// 成功返回 ()，失败返回 AppError
 #[tauri::command]
-pub fn emit_devtools_log(
-    tag: String,
-    data: String,
-    app_handle: AppHandle,
-) -> Result<(), AppError> {
-    use tauri::Emitter;
+pub fn emit_devtools_log(tag: String, data: String, app_handle: AppHandle) -> Result<(), AppError> {
     use serde_json::Value as JsonValue;
     use std::io::{Error as IoError, ErrorKind};
+    use tauri::Emitter;
 
-    let timestamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S%.3f").to_string();
+    let timestamp = chrono::Utc::now()
+        .format("%Y-%m-%d %H:%M:%S%.3f")
+        .to_string();
 
     // 解析 data 为 JSON
-    let json_data: JsonValue = serde_json::from_str(&data).unwrap_or(JsonValue::String(data.clone()));
+    let json_data: JsonValue =
+        serde_json::from_str(&data).unwrap_or(JsonValue::String(data.clone()));
 
     let payload = serde_json::json!({
         "timestamp": timestamp,

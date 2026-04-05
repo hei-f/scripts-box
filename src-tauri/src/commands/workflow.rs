@@ -28,9 +28,9 @@ pub async fn create_workflow(
     workflow: Workflow,
     db: State<'_, Mutex<Database>>,
 ) -> Result<(), AppError> {
-    let db_guard = db.lock().map_err(|e| {
-        AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-    })?;
+    let db_guard = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
     db_guard.insert_workflow(&workflow)?;
 
@@ -52,9 +52,9 @@ pub async fn get_workflow(
     id: String,
     db: State<'_, Mutex<Database>>,
 ) -> Result<Workflow, AppError> {
-    let db_guard = db.lock().map_err(|e| {
-        AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-    })?;
+    let db_guard = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
     let workflow = db_guard
         .get_workflow(&id)?
@@ -73,12 +73,10 @@ pub async fn get_workflow(
 /// # 返回
 /// 成功返回工作流信息列表，失败返回 AppError
 #[tauri::command]
-pub async fn list_workflows(
-    db: State<'_, Mutex<Database>>,
-) -> Result<Vec<WorkflowInfo>, AppError> {
-    let db_guard = db.lock().map_err(|e| {
-        AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-    })?;
+pub async fn list_workflows(db: State<'_, Mutex<Database>>) -> Result<Vec<WorkflowInfo>, AppError> {
+    let db_guard = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
     let workflows = db_guard.list_workflows()?;
 
@@ -100,9 +98,9 @@ pub async fn update_workflow(
     workflow: Workflow,
     db: State<'_, Mutex<Database>>,
 ) -> Result<(), AppError> {
-    let db_guard = db.lock().map_err(|e| {
-        AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-    })?;
+    let db_guard = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
     db_guard.update_workflow(&workflow)?;
 
@@ -120,13 +118,10 @@ pub async fn update_workflow(
 /// # 返回
 /// 成功返回 ()，工作流不存在返回 AppError::NotFoundError
 #[tauri::command]
-pub async fn delete_workflow(
-    id: String,
-    db: State<'_, Mutex<Database>>,
-) -> Result<(), AppError> {
-    let db_guard = db.lock().map_err(|e| {
-        AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-    })?;
+pub async fn delete_workflow(id: String, db: State<'_, Mutex<Database>>) -> Result<(), AppError> {
+    let db_guard = db
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
     db_guard.delete_workflow(&id)?;
 
@@ -158,9 +153,9 @@ pub async fn execute_workflow(
 ) -> Result<WorkflowResult, AppError> {
     // 获取工作流定义
     let workflow = {
-        let db_guard = db.lock().map_err(|e| {
-            AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-        })?;
+        let db_guard = db
+            .lock()
+            .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
         db_guard
             .get_workflow(&id)?
@@ -169,12 +164,12 @@ pub async fn execute_workflow(
 
     // 在单独的作用域中执行工作流，确保锁在 await 之前释放
     let result = {
-        let registry_guard = registry.lock().map_err(|e| {
-            AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e))
-        })?;
-        let db_guard = db.lock().map_err(|e| {
-            AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-        })?;
+        let registry_guard = registry
+            .lock()
+            .map_err(|e| AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e)))?;
+        let db_guard = db
+            .lock()
+            .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
 
         // 创建工作流执行器
         let executor = WorkflowExecutor::new(&registry_guard, &db_guard);
@@ -201,9 +196,9 @@ pub fn get_script_output_schema(
     id: String,
     registry: State<'_, Mutex<ScriptRegistry>>,
 ) -> Result<Vec<OutputDefinition>, AppError> {
-    let registry_guard = registry.lock().map_err(|e| {
-        AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e))
-    })?;
+    let registry_guard = registry
+        .lock()
+        .map_err(|e| AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e)))?;
 
     let script = registry_guard
         .get(&id)

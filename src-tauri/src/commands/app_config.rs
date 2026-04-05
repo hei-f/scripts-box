@@ -18,12 +18,10 @@ use crate::error::AppError;
 /// # 返回
 /// 成功返回应用配置，失败返回 AppError
 #[tauri::command]
-pub fn get_app_config(
-    state: State<'_, Mutex<AppConfigManager>>,
-) -> Result<AppConfig, AppError> {
-    let manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e))
-    })?;
+pub fn get_app_config(state: State<'_, Mutex<AppConfigManager>>) -> Result<AppConfig, AppError> {
+    let manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e)))?;
 
     Ok(manager.get_config().clone())
 }
@@ -43,9 +41,9 @@ pub fn update_app_config(
     config: AppConfig,
     state: State<'_, Mutex<AppConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e)))?;
 
     manager.update_config(config)?;
 
@@ -67,9 +65,9 @@ pub fn update_window_config(
     config: WindowConfig,
     state: State<'_, Mutex<AppConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e)))?;
 
     manager.update_window_config(config)?;
 
@@ -91,9 +89,9 @@ pub fn update_shortcut_config(
     config: ShortcutConfig,
     state: State<'_, Mutex<AppConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e)))?;
 
     manager.update_shortcut_config(config)?;
 
@@ -115,9 +113,9 @@ pub fn update_tray_config(
     config: TrayConfig,
     state: State<'_, Mutex<AppConfigManager>>,
 ) -> Result<(), AppError> {
-    let mut manager = state.lock().map_err(|e| {
-        AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e))
-    })?;
+    let mut manager = state
+        .lock()
+        .map_err(|e| AppError::ConfigError(format!("获取应用配置管理器锁失败: {}", e)))?;
 
     manager.update_tray_config(config)?;
 

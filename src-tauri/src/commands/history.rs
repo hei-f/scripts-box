@@ -29,7 +29,9 @@ pub fn list_execution_history(
     // 使用默认限制值，确保 limit 为正数
     let effective_limit = limit.unwrap_or(DEFAULT_LIMIT).max(1);
 
-    let db = state.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = state
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.list_history(script_id.as_deref(), effective_limit)
 }
 
@@ -42,8 +44,13 @@ pub fn list_execution_history(
 /// # 返回
 /// 成功返回 ()，失败返回 AppError
 #[tauri::command]
-pub fn delete_execution_history(id: i64, state: State<'_, Mutex<Database>>) -> Result<(), AppError> {
-    let db = state.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+pub fn delete_execution_history(
+    id: i64,
+    state: State<'_, Mutex<Database>>,
+) -> Result<(), AppError> {
+    let db = state
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.delete_history(id)
 }
 
@@ -60,6 +67,8 @@ pub fn clear_execution_history(
     script_id: Option<String>,
     state: State<'_, Mutex<Database>>,
 ) -> Result<(), AppError> {
-    let db = state.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
+    let db = state
+        .lock()
+        .map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.clear_history(script_id.as_deref())
 }

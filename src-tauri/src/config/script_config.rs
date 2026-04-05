@@ -80,16 +80,12 @@ impl ScriptConfig {
 
         // 验证 name 不为空
         if self.name.trim().is_empty() {
-            return Err(AppError::ValidationError(
-                "脚本名称不能为空".to_string(),
-            ));
+            return Err(AppError::ValidationError("脚本名称不能为空".to_string()));
         }
 
         // 验证 command_type 不为空
         if self.command_type.trim().is_empty() {
-            return Err(AppError::ValidationError(
-                "命令类型不能为空".to_string(),
-            ));
+            return Err(AppError::ValidationError("命令类型不能为空".to_string()));
         }
 
         // 验证参数名称不重复
@@ -350,7 +346,9 @@ mod tests {
         // 更新脚本
         let mut updated_config = create_test_config();
         updated_config.name = "更新后的名称".to_string();
-        assert!(config_file.update_script("test-script", updated_config).is_ok());
+        assert!(config_file
+            .update_script("test-script", updated_config)
+            .is_ok());
 
         let found = config_file.get_script("test-script").unwrap();
         assert_eq!(found.name, "更新后的名称");

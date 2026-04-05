@@ -57,9 +57,8 @@ impl ScriptConfigManager {
 
         // 确保配置目录存在
         if !config_dir.exists() {
-            fs::create_dir_all(&config_dir).map_err(|e| {
-                AppError::ConfigError(format!("创建配置目录失败: {}", e))
-            })?;
+            fs::create_dir_all(&config_dir)
+                .map_err(|e| AppError::ConfigError(format!("创建配置目录失败: {}", e)))?;
         }
 
         // 构建配置文件路径
@@ -68,27 +67,22 @@ impl ScriptConfigManager {
         // 加载或创建配置文件
         let config = if config_path.exists() {
             // 读取配置文件
-            let content = fs::read_to_string(&config_path).map_err(|e| {
-                AppError::ConfigError(format!("读取配置文件失败: {}", e))
-            })?;
+            let content = fs::read_to_string(&config_path)
+                .map_err(|e| AppError::ConfigError(format!("读取配置文件失败: {}", e)))?;
 
             // 解析配置文件
-            serde_json::from_str(&content).map_err(|e| {
-                AppError::ConfigError(format!("解析配置文件失败: {}", e))
-            })?
+            serde_json::from_str(&content)
+                .map_err(|e| AppError::ConfigError(format!("解析配置文件失败: {}", e)))?
         } else {
             // 创建默认配置文件
             let default_config = ScriptsConfigFile::new();
 
             // 保存默认配置到文件
             let content = serde_json::to_string_pretty(&default_config)
-                .map_err(|e| {
-                    AppError::ConfigError(format!("序列化默认配置失败: {}", e))
-                })?;
+                .map_err(|e| AppError::ConfigError(format!("序列化默认配置失败: {}", e)))?;
 
-            fs::write(&config_path, &content).map_err(|e| {
-                AppError::ConfigError(format!("写入默认配置文件失败: {}", e))
-            })?;
+            fs::write(&config_path, &content)
+                .map_err(|e| AppError::ConfigError(format!("写入默认配置文件失败: {}", e)))?;
 
             default_config
         };
@@ -110,14 +104,12 @@ impl ScriptConfigManager {
         self.create_backup()?;
 
         // 序列化配置
-        let content = serde_json::to_string_pretty(&self.config).map_err(|e| {
-            AppError::ConfigError(format!("序列化配置失败: {}", e))
-        })?;
+        let content = serde_json::to_string_pretty(&self.config)
+            .map_err(|e| AppError::ConfigError(format!("序列化配置失败: {}", e)))?;
 
         // 写入配置文件
-        fs::write(&self.config_path, &content).map_err(|e| {
-            AppError::ConfigError(format!("写入配置文件失败: {}", e))
-        })?;
+        fs::write(&self.config_path, &content)
+            .map_err(|e| AppError::ConfigError(format!("写入配置文件失败: {}", e)))?;
 
         Ok(())
     }
@@ -135,19 +127,22 @@ impl ScriptConfigManager {
             return Ok(());
         }
 
-        let config_dir = self.config_path.parent().ok_or_else(|| {
-            AppError::ConfigError("无法获取配置文件目录".to_string())
-        })?;
+        let config_dir = self
+            .config_path
+            .parent()
+            .ok_or_else(|| AppError::ConfigError("无法获取配置文件目录".to_string()))?;
 
         // 生成备份文件名（使用当前时间戳）
         let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
-        let backup_file_name = format!("{}{}{}", BACKUP_FILE_PREFIX, timestamp, BACKUP_FILE_EXTENSION);
+        let backup_file_name = format!(
+            "{}{}{}",
+            BACKUP_FILE_PREFIX, timestamp, BACKUP_FILE_EXTENSION
+        );
         let backup_path = config_dir.join(&backup_file_name);
 
         // 复制当前配置文件到备份文件
-        fs::copy(&self.config_path, &backup_path).map_err(|e| {
-            AppError::ConfigError(format!("创建备份文件失败: {}", e))
-        })?;
+        fs::copy(&self.config_path, &backup_path)
+            .map_err(|e| AppError::ConfigError(format!("创建备份文件失败: {}", e)))?;
 
         // 清理旧备份文件，只保留最近的 MAX_BACKUP_COUNT 个
         self.cleanup_old_backups(config_dir)?;
@@ -168,14 +163,12 @@ impl ScriptConfigManager {
         // 收集所有备份文件
         let mut backup_files: Vec<(String, std::time::SystemTime)> = Vec::new();
 
-        let entries = fs::read_dir(config_dir).map_err(|e| {
-            AppError::ConfigError(format!("读取配置目录失败: {}", e))
-        })?;
+        let entries = fs::read_dir(config_dir)
+            .map_err(|e| AppError::ConfigError(format!("读取配置目录失败: {}", e)))?;
 
         for entry in entries {
-            let entry = entry.map_err(|e| {
-                AppError::ConfigError(format!("读取目录条目失败: {}", e))
-            })?;
+            let entry =
+                entry.map_err(|e| AppError::ConfigError(format!("读取目录条目失败: {}", e)))?;
 
             let file_name = entry.file_name();
             let file_name_str = file_name.to_string_lossy();
@@ -185,13 +178,13 @@ impl ScriptConfigManager {
                 && file_name_str.ends_with(BACKUP_FILE_EXTENSION)
             {
                 // 获取文件的修改时间
-                let metadata = entry.metadata().map_err(|e| {
-                    AppError::ConfigError(format!("读取文件元数据失败: {}", e))
-                })?;
+                let metadata = entry
+                    .metadata()
+                    .map_err(|e| AppError::ConfigError(format!("读取文件元数据失败: {}", e)))?;
 
-                let modified_time = metadata.modified().map_err(|e| {
-                    AppError::ConfigError(format!("获取文件修改时间失败: {}", e))
-                })?;
+                let modified_time = metadata
+                    .modified()
+                    .map_err(|e| AppError::ConfigError(format!("获取文件修改时间失败: {}", e)))?;
 
                 backup_files.push((file_name_str.to_string(), modified_time));
             }
@@ -204,9 +197,8 @@ impl ScriptConfigManager {
         if backup_files.len() > MAX_BACKUP_COUNT {
             for (file_name, _) in backup_files.iter().skip(MAX_BACKUP_COUNT) {
                 let file_path = config_dir.join(file_name);
-                fs::remove_file(&file_path).map_err(|e| {
-                    AppError::ConfigError(format!("删除旧备份文件失败: {}", e))
-                })?;
+                fs::remove_file(&file_path)
+                    .map_err(|e| AppError::ConfigError(format!("删除旧备份文件失败: {}", e)))?;
             }
         }
 
@@ -306,7 +298,10 @@ impl ScriptConfigManager {
     ///
     /// # 返回
     /// 成功返回 Ok(())，验证失败返回 AppError
-    pub fn sync_builtin_scripts(&mut self, scripts: &[&std::sync::Arc<dyn Script>]) -> Result<(), AppError> {
+    pub fn sync_builtin_scripts(
+        &mut self,
+        scripts: &[&std::sync::Arc<dyn Script>],
+    ) -> Result<(), AppError> {
         for script in scripts {
             self.add_builtin_script(script.as_ref())?;
         }

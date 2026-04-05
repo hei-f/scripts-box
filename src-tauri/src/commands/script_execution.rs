@@ -22,12 +22,10 @@ use crate::script_api::{ParamDefinition, ScriptContext, ScriptInfo, ScriptResult
 /// # 返回
 /// 成功返回脚本元信息列表，失败返回 AppError
 #[tauri::command]
-pub fn list_scripts(
-    state: State<'_, Mutex<ScriptRegistry>>,
-) -> Result<Vec<ScriptInfo>, AppError> {
-    let registry = state.lock().map_err(|e| {
-        AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e))
-    })?;
+pub fn list_scripts(state: State<'_, Mutex<ScriptRegistry>>) -> Result<Vec<ScriptInfo>, AppError> {
+    let registry = state
+        .lock()
+        .map_err(|e| AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e)))?;
 
     // 遍历所有脚本，提取元信息
     let scripts: Vec<ScriptInfo> = registry
@@ -58,14 +56,14 @@ pub fn get_script_params(
     id: String,
     state: State<'_, Mutex<ScriptRegistry>>,
 ) -> Result<Vec<ParamDefinition>, AppError> {
-    let registry = state.lock().map_err(|e| {
-        AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e))
-    })?;
+    let registry = state
+        .lock()
+        .map_err(|e| AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e)))?;
 
     // 查找脚本
-    let script = registry.get(&id).ok_or_else(|| {
-        AppError::NotFoundError(format!("脚本不存在: {}", id))
-    })?;
+    let script = registry
+        .get(&id)
+        .ok_or_else(|| AppError::NotFoundError(format!("脚本不存在: {}", id)))?;
 
     // 获取参数定义
     Ok(script.params_schema())
@@ -99,13 +97,13 @@ pub async fn execute_script(
 
     // 获取脚本实例
     let script = {
-        let registry_guard = registry.lock().map_err(|e| {
-            AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e))
-        })?;
+        let registry_guard = registry
+            .lock()
+            .map_err(|e| AppError::ScriptError(format!("获取脚本注册中心锁失败: {}", e)))?;
 
-        registry_guard.get(&id).ok_or_else(|| {
-            AppError::NotFoundError(format!("脚本不存在: {}", id))
-        })?
+        registry_guard
+            .get(&id)
+            .ok_or_else(|| AppError::NotFoundError(format!("脚本不存在: {}", id)))?
     };
 
     // 创建执行上下文
@@ -135,7 +133,10 @@ pub async fn execute_script(
                 create_failure_record(
                     id.clone(),
                     params.to_string(),
-                    script_result.error.clone().unwrap_or_else(|| "未知错误".to_string()),
+                    script_result
+                        .error
+                        .clone()
+                        .unwrap_or_else(|| "未知错误".to_string()),
                     executed_at,
                     duration_ms,
                 )
@@ -152,12 +153,12 @@ pub async fn execute_script(
 
     // 写入数据库
     {
-        let db_guard = db.lock().map_err(|e| {
-            AppError::DatabaseError(format!("获取数据库锁失败: {}", e))
-        })?;
-        db_guard.insert_history(record).map_err(|e| {
-            AppError::DatabaseError(format!("写入执行历史失败: {}", e))
-        })?;
+        let db_guard = db
+            .lock()
+            .map_err(|e| AppError::DatabaseError(format!("获取数据库锁失败: {}", e)))?;
+        db_guard
+            .insert_history(record)
+            .map_err(|e| AppError::DatabaseError(format!("写入执行历史失败: {}", e)))?;
     }
 
     // 返回执行结果
