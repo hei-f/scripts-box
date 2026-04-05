@@ -21,44 +21,44 @@ use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut}
 
 // 引入命令模块中的所有命令
 use commands::{
-    // 应用配置相关命令
-    get_app_config,
-    update_app_config,
-    update_shortcut_config,
-    update_tray_config,
-    update_window_config,
     // 错误日志相关命令
     cleanup_old_error_logs,
     clear_debug_log,
     clear_error_logs,
+    // 执行历史相关命令
+    clear_execution_history,
+    // 脚本配置相关命令
+    create_script_config,
+    // 工作流相关命令
+    create_workflow,
+    delete_execution_history,
+    delete_script_config,
+    delete_workflow,
     emit_devtools_log,
+    // 脚本执行相关命令
+    execute_script,
+    execute_workflow,
+    // 应用配置相关命令
+    get_app_config,
+    get_script_config,
+    get_script_output_schema,
+    get_script_params,
+    get_workflow,
     list_error_logs,
+    list_execution_history,
+    list_script_configs,
+    list_scripts,
+    list_workflows,
     log_frontend_error,
     open_devtools_window,
     read_debug_log,
-    write_debug_log,
-    // 脚本配置相关命令
-    create_script_config,
-    delete_script_config,
-    get_script_config,
-    list_script_configs,
+    update_app_config,
     update_script_config,
-    // 脚本执行相关命令
-    execute_script,
-    get_script_params,
-    list_scripts,
-    // 执行历史相关命令
-    clear_execution_history,
-    delete_execution_history,
-    list_execution_history,
-    // 工作流相关命令
-    create_workflow,
-    delete_workflow,
-    execute_workflow,
-    get_script_output_schema,
-    get_workflow,
-    list_workflows,
+    update_shortcut_config,
+    update_tray_config,
+    update_window_config,
     update_workflow,
+    write_debug_log,
 };
 
 // 引入状态类型
@@ -80,10 +80,7 @@ pub fn run() {
             let app_handle = app.handle();
 
             // 获取配置目录路径
-            let config_dir = app_handle
-                .path()
-                .config_dir()
-                .expect("无法获取配置目录");
+            let config_dir = app_handle.path().config_dir().expect("无法获取配置目录");
 
             // 初始化数据库
             let db = Database::init(&config_dir).expect("数据库初始化失败");
@@ -118,12 +115,14 @@ pub fn run() {
             app.manage(Mutex::new(db));
 
             // 创建托盘菜单
-            let show_window_item = MenuItem::with_id(app, "show_window", "显示主窗口", true, None::<&str>)
-                .expect("创建菜单项失败");
-            let quick_execute_item = MenuItem::with_id(app, "quick_execute", "快速执行", true, None::<&str>)
-                .expect("创建菜单项失败");
-            let quit_item = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)
-                .expect("创建菜单项失败");
+            let show_window_item =
+                MenuItem::with_id(app, "show_window", "显示主窗口", true, None::<&str>)
+                    .expect("创建菜单项失败");
+            let quick_execute_item =
+                MenuItem::with_id(app, "quick_execute", "快速执行", true, None::<&str>)
+                    .expect("创建菜单项失败");
+            let quit_item =
+                MenuItem::with_id(app, "quit", "退出", true, None::<&str>).expect("创建菜单项失败");
 
             let menu = Menu::with_items(app, &[&show_window_item, &quick_execute_item, &quit_item])
                 .expect("创建托盘菜单失败");
@@ -270,13 +269,16 @@ fn show_quick_execution_window(app: &tauri::AppHandle) {
 fn register_quick_execution_shortcut(app: &tauri::AppHandle, shortcut_str: &str) {
     // 解析快捷键字符串（格式如 "CommandOrControl+Shift+P"）
     let shortcut = parse_shortcut_string(shortcut_str);
-    
+
     if let Some(shortcut) = shortcut {
         // 注册快捷键
         let app_handle = app.clone();
-        if let Err(e) = app.global_shortcut().on_shortcut(shortcut, move |_app, _shortcut, _event| {
-            show_quick_execution_window(&app_handle);
-        }) {
+        if let Err(e) =
+            app.global_shortcut()
+                .on_shortcut(shortcut, move |_app, _shortcut, _event| {
+                    show_quick_execution_window(&app_handle);
+                })
+        {
             eprintln!("注册快捷键失败: {}", e);
         }
     }
