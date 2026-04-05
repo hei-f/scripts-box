@@ -43,7 +43,7 @@ jobs:
           name: macos-dmg
           path: src-tauri/target/release/bundle/dmg/*.dmg
 
-   build-windows:
+  build-windows:
     runs-on: windows-latest
     steps:
       - name: 检出代码
