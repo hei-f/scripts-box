@@ -1,0 +1,2 @@
+# TypeScript 类型检查
+bunx tsc --noEmit

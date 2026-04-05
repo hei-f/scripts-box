@@ -5,6 +5,15 @@
  * Tauri 会自动处理 camelCase 和 snake_case 的转换
  */
 
+// 导出应用配置相关类型
+export type {
+  AppConfig,
+  CloseBehavior,
+  ShortcutConfig,
+  TrayConfig,
+  WindowConfig,
+} from './appConfig';
+
 /**
  * 选择项定义
  */

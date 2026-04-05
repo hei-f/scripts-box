@@ -10,6 +10,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppstoreOutlined,
   HistoryOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -38,6 +39,11 @@ const MainLayout: React.FC = () => {
       key: '/history',
       icon: <HistoryOutlined />,
       label: '执行历史',
+    },
+    {
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: '设置',
     },
   ];
 
