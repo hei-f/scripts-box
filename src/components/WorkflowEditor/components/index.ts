@@ -17,5 +17,11 @@ export { default as PropertyPanel } from './panels/PropertyPanel';
 export { default as ScriptPanel } from './panels/ScriptPanel';
 export type { ScriptPanelProps } from './panels/ScriptPanel';
 
+// 展示组件
+export { default as Canvas } from './Canvas';
+export type { CanvasProps } from './Canvas';
+export { default as WorkflowLayout } from './WorkflowLayout';
+export type { WorkflowLayoutProps } from './WorkflowLayout';
+
 // 工具组件
 export { default as Toolbar } from './Toolbar';

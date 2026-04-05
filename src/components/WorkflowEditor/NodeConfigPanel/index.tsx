@@ -53,6 +53,7 @@ const NodeConfigPanel: React.FC<NodeConfigPanelProps> = ({
           />
         );
       case 'output':
+      case 'workflowOutput':
         return (
           <OutputConfigPanel
             data={data as OutputNodeData}

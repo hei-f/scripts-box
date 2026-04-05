@@ -1,5 +1,7 @@
 /**
  * 工作流状态管理 Hook
+ *
+ * 提供工作流初始化和 fitView 控制逻辑
  */
 
 import { useState, useRef, useCallback, startTransition, useEffect } from 'react';
@@ -40,6 +42,10 @@ interface UseWorkflowStateReturn {
   workflowMeta: WorkflowMeta;
   setWorkflowMeta: React.Dispatch<React.SetStateAction<WorkflowMeta>>;
 
+  // 初始化标记（用于控制 fitView）
+  isWorkflowInitialized: React.MutableRefObject<boolean>;
+  hasInitialFitView: React.MutableRefObject<boolean>;
+
   // 调试日志
   debugLog: (tag: string, data: Record<string, unknown>) => void;
 }
@@ -71,9 +77,11 @@ export function useWorkflowState({
   // 标记工作流初始化是否已完成
   const isWorkflowInitialized = useRef(false);
 
+  // 标记是否已完成初始 fitView
+  const hasInitialFitView = useRef(false);
+
   // 调试日志
   const debugLog = useCallback((tag: string, data: Record<string, unknown>) => {
-    console.log('[WorkflowEditor DEBUG]', tag, data);
     writeDebugLog(tag, data).match(
       () => {},
       (err) => console.error('写入调试日志失败:', err)
@@ -175,6 +183,8 @@ export function useWorkflowState({
     setPropertyPanel,
     workflowMeta,
     setWorkflowMeta,
+    isWorkflowInitialized,
+    hasInitialFitView,
     debugLog,
   };
 }

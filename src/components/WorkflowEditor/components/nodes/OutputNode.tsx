@@ -12,6 +12,8 @@ import {
   ExportOutlined,
 } from '@ant-design/icons';
 import type { OutputDefinition } from '../../../../types/workflow';
+import { getOutputTypeColor } from '../../config/colors';
+import { NODE_WIDTH, HANDLE_SIZE } from '../../config/dimensions';
 
 const { Text } = Typography;
 
@@ -26,19 +28,6 @@ export interface OutputNodeData extends Record<string, unknown> {
   /** 是否选中 */
   selected?: boolean;
 }
-
-/**
- * 获取输出类型的显示颜色
- */
-const getOutputTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    boolean: '#eb2f96',
-    json: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
 
 /**
  * 输出节点组件属性
@@ -61,7 +50,7 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data, selected }) => {
     <Card
       size="small"
       style={{
-        width: 280,
+        width: NODE_WIDTH,
         borderColor: selected || data.selected ? token.colorPrimary : token.colorBorder,
         borderWidth: selected || data.selected ? 2 : 1,
         boxShadow: selected || data.selected
@@ -110,8 +99,8 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data, selected }) => {
               id={`input-${output.name}`}
               style={{
                 left: 0,
-                width: 10,
-                height: 10,
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
                 background: getOutputTypeColor(output.outputType),
                 border: `2px solid ${token.colorBgContainer}`,
               }}
@@ -133,9 +122,31 @@ const OutputNode: React.FC<OutputNodeProps> = ({ data, selected }) => {
           </div>
         ))
       ) : (
-        <Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
-          暂无输出定义
-        </Text>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            padding: `${token.paddingXXS}px 0`,
+          }}
+        >
+          {/* 默认输入端口 */}
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="input-default"
+            style={{
+              left: 0,
+              width: 10,
+              height: 10,
+              background: token.colorPrimary,
+              border: `2px solid ${token.colorBgContainer}`,
+            }}
+          />
+          <Text type="secondary" style={{ fontSize: token.fontSizeSM, marginLeft: token.marginXS }}>
+            暂无输出定义
+          </Text>
+        </div>
       )}
     </Card>
   );

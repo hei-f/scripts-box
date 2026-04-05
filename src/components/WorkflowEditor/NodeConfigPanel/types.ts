@@ -31,7 +31,7 @@ export interface NodeConfigPanelProps {
   /** 节点 ID */
   nodeId: string;
   /** 节点类型 */
-  nodeType: 'script' | 'input' | 'output';
+  nodeType: 'script' | 'input' | 'output' | 'workflowOutput';
   /** 节点数据 */
   data: NodeData;
   /** 上游节点输出列表（用于参数来源选择） */

@@ -28,6 +28,8 @@ interface PropertyPanelProps {
     sourceNodeId?: string,
     outputField?: string
   ) => void;
+  /** 输出节点数据更新回调 */
+  onOutputNodeDataUpdate?: (data: unknown) => void;
   /** 删除节点回调 */
   onDelete: () => void;
 }

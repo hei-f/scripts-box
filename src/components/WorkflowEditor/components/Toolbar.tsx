@@ -1,11 +1,11 @@
 /**
  * 工具栏组件
  *
- * 提供保存、执行、撤销、重做等操作按钮
+ * 提供工作流编辑器的操作按钮，包括保存、执行、撤销、重做等
  */
 
 import React from 'react';
-import { Button, Tooltip, Space, Divider, Input, theme } from 'antd';
+import { Button, Divider, Input, Space, Tooltip } from 'antd';
 import {
   SaveOutlined,
   PlayCircleOutlined,
@@ -13,19 +13,21 @@ import {
   RedoOutlined,
   BugOutlined,
 } from '@ant-design/icons';
+
 import { openDevtoolsWindow } from '../../../services/tauri';
 
-interface ToolbarProps {
+/** Toolbar 组件属性 */
+export interface ToolbarProps {
   /** 工作流名称 */
   workflowName: string;
-  /** 名称变更回调 */
-  onNameChange: (name: string) => void;
+  /** 工作流 ID（用于判断是否已保存） */
+  workflowId?: string;
   /** 是否正在保存 */
   saving: boolean;
   /** 是否正在执行 */
   executing: boolean;
-  /** 是否可以执行（已保存的工作流） */
-  canExecute: boolean;
+  /** 名称变更回调 */
+  onNameChange: (name: string) => void;
   /** 保存回调 */
   onSave: () => void;
   /** 执行回调 */
@@ -43,32 +45,35 @@ interface ToolbarProps {
  */
 const Toolbar: React.FC<ToolbarProps> = ({
   workflowName,
-  onNameChange,
+  workflowId,
   saving,
   executing,
-  canExecute,
+  onNameChange,
   onSave,
   onExecute,
   onUndo,
   onRedo,
   onCancel,
 }) => {
-  const { token } = theme.useToken();
-
   return (
     <div
       style={{
-        padding: `${token.paddingXS}px ${token.paddingSM}px`,
-        borderBottom: `1px solid ${token.colorBorder}`,
+        padding: '8px 12px',
+        borderBottom: '1px solid var(--ant-color-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: token.colorBgContainer,
+        background: 'var(--ant-color-bg-container)',
       }}
     >
       <Space>
         <Tooltip title="保存工作流">
-          <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={onSave}>
+          <Button
+            type="primary"
+            icon={<SaveOutlined />}
+            loading={saving}
+            onClick={onSave}
+          >
             保存
           </Button>
         </Tooltip>
@@ -77,21 +82,32 @@ const Toolbar: React.FC<ToolbarProps> = ({
             icon={<PlayCircleOutlined />}
             loading={executing}
             onClick={onExecute}
-            disabled={!canExecute}
+            disabled={!workflowId}
           >
             执行
           </Button>
         </Tooltip>
         <Divider type="vertical" />
         <Tooltip title="撤销">
-          <Button icon={<UndoOutlined />} onClick={onUndo} disabled />
+          <Button
+            icon={<UndoOutlined />}
+            onClick={onUndo}
+            disabled
+          />
         </Tooltip>
         <Tooltip title="重做">
-          <Button icon={<RedoOutlined />} onClick={onRedo} disabled />
+          <Button
+            icon={<RedoOutlined />}
+            onClick={onRedo}
+            disabled
+          />
         </Tooltip>
         <Divider type="vertical" />
         <Tooltip title="打开开发者工具">
-          <Button icon={<BugOutlined />} onClick={() => openDevtoolsWindow()} />
+          <Button
+            icon={<BugOutlined />}
+            onClick={() => openDevtoolsWindow()}
+          />
         </Tooltip>
       </Space>
 
@@ -102,7 +118,9 @@ const Toolbar: React.FC<ToolbarProps> = ({
           onChange={(e) => onNameChange(e.target.value)}
           style={{ width: 200 }}
         />
-        {onCancel && <Button onClick={onCancel}>取消</Button>}
+        {onCancel && (
+          <Button onClick={onCancel}>取消</Button>
+        )}
       </Space>
     </div>
   );

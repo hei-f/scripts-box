@@ -121,6 +121,7 @@ describe('workflow tauri commands', () => {
           name: '工作流1',
           createdAt: 1712345678000,
           updatedAt: 1712345678000,
+          nodeCount: 3,
         },
         {
           id: 'workflow_2',
@@ -128,6 +129,7 @@ describe('workflow tauri commands', () => {
           description: '描述',
           createdAt: 1712345678000,
           updatedAt: 1712345678000,
+          nodeCount: 5,
         },
       ];
 

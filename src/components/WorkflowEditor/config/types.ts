@@ -3,7 +3,7 @@
  */
 
 import type { Node, Edge } from '@xyflow/react';
-import type { ParamDefinition, ParamSource, ScriptConfig, Workflow, WorkflowNode, WorkflowEdge } from '../../../types';
+import type { ParamDefinition, ParamSource, ScriptConfig, Workflow, WorkflowNode, WorkflowEdge, OutputDefinition } from '../../../types';
 
 /**
  * 工作流元数据
@@ -18,7 +18,7 @@ export interface WorkflowMeta {
  */
 export interface PropertyPanelData {
   nodeId: string;
-  nodeType: 'script' | 'input' | 'output';
+  nodeType: 'script' | 'input' | 'workflowOutput';
   data: ScriptNodeData | InputNodeData | OutputNodeData;
   /** 脚本 ID（仅 Script 节点有） */
   scriptId?: string;
@@ -34,7 +34,7 @@ export interface ScriptNodeData {
   name?: string;
   description?: string;
   paramsSchema?: ParamDefinition[];
-  outputSchema?: Array<{ name: string; label: string }>;
+  outputSchema?: OutputDefinition[];
   paramsConfig?: Record<string, ParamSource>;
 }
 
@@ -52,7 +52,7 @@ export interface InputNodeData {
  */
 export interface OutputNodeData {
   name: string;
-  outputSchema: Array<{ name: string; label: string }>;
+  outputSchema: OutputDefinition[];
   paramsConfig?: Record<string, ParamSource>;
 }
 

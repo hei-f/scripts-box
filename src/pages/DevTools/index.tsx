@@ -435,7 +435,7 @@ const DevToolsPage: React.FC = () => {
                           </div>
                           <div>
                             <Text type="secondary">节点数: </Text>
-                            <Text>{'N/A'}</Text>
+                            <Text>{workflow.nodeCount ?? 'N/A'}</Text>
                           </div>
                           {workflow.description && (
                             <Text type="secondary">{workflow.description}</Text>

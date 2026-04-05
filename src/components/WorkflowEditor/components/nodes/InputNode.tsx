@@ -12,6 +12,8 @@ import {
   ImportOutlined,
 } from '@ant-design/icons';
 import type { ParamDefinition } from '../../../../types';
+import { getParamTypeColor } from '../../config/colors';
+import { INPUT_NODE_WIDTH, HANDLE_SIZE } from '../../config/dimensions';
 
 const { Text } = Typography;
 
@@ -26,21 +28,6 @@ export interface InputNodeData extends Record<string, unknown> {
   /** 是否选中 */
   selected?: boolean;
 }
-
-/**
- * 获取参数类型的显示颜色
- */
-const getParamTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    file_path: '#fa8c16',
-    directory_path: '#fa8c16',
-    select: '#722ed1',
-    multi_select: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
 
 /**
  * 参数类型转换为显示字符串
@@ -79,7 +66,7 @@ const InputNode: React.FC<InputNodeProps> = ({ data, selected }) => {
     <Card
       size="small"
       style={{
-        width: 260,
+        width: INPUT_NODE_WIDTH,
         borderColor: selected || data.selected ? token.colorPrimary : token.colorBorder,
         borderWidth: selected || data.selected ? 2 : 1,
         boxShadow: selected || data.selected
@@ -150,8 +137,8 @@ const InputNode: React.FC<InputNodeProps> = ({ data, selected }) => {
               id={`output-${param.name}`}
               style={{
                 right: 0,
-                width: 10,
-                height: 10,
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
                 background: getParamTypeColor(paramTypeToString(param.type)),
                 border: `2px solid ${token.colorBgContainer}`,
               }}

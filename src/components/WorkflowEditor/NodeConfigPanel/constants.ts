@@ -2,14 +2,8 @@
  * NodeConfigPanel 常量定义
  */
 
-/**
- * 参数来源类型选项
- */
-export const PARAM_SOURCE_OPTIONS = [
-  { value: 'static', label: '静态值' },
-  { value: 'fromInput', label: '来自输入参数' },
-  { value: 'fromNodeOutput', label: '来自上游输出' },
-];
+// 从 config/constants.ts 重新导出 PARAM_SOURCE_OPTIONS
+export { PARAM_SOURCE_OPTIONS } from '../config/constants';
 
 /**
  * 参数类型选项

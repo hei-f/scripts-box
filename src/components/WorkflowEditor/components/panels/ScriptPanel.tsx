@@ -18,6 +18,7 @@ import {
 import type { ScriptInfo, ParamDefinition } from '../../../../types';
 import type { OutputDefinition } from '../../../../types/workflow';
 import { listScripts, getScriptOutputSchema, getScriptParams } from '../../../../services/tauri';
+import { getParamTypeColor, getOutputTypeColor } from '../../config/colors';
 
 const { Text } = Typography;
 
@@ -38,34 +39,6 @@ export interface ScriptPanelProps {
   /** 拖拽开始时的回调 */
   onDragStart?: (event: React.DragEvent, script: ScriptDetail) => void;
 }
-
-/**
- * 获取参数类型的显示颜色
- */
-const getParamTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    file_path: '#fa8c16',
-    directory_path: '#fa8c16',
-    select: '#722ed1',
-    multi_select: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
-
-/**
- * 获取输出类型的显示颜色
- */
-const getOutputTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    boolean: '#eb2f96',
-    json: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
 
 /**
  * 参数类型转换为显示字符串

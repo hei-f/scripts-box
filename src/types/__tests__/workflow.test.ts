@@ -248,11 +248,13 @@ describe('workflow types', () => {
         description: '这是一个测试',
         createdAt: 1712345678000,
         updatedAt: 1712345678000,
+        nodeCount: 3,
       };
 
       expect(info.id).toBe('workflow_1');
       expect(info.name).toBe('测试工作流');
       expect(info.createdAt).toBe(1712345678000);
+      expect(info.nodeCount).toBe(3);
     });
 
     it('should create workflow info without description', () => {
@@ -261,6 +263,7 @@ describe('workflow types', () => {
         name: '简单工作流',
         createdAt: 1712345678000,
         updatedAt: 1712345678000,
+        nodeCount: 0,
       };
 
       expect(info.description).toBeUndefined();

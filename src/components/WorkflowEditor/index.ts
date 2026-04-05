@@ -6,7 +6,7 @@
 
 // 导出主编辑器组件
 export { default as WorkflowEditor } from './WorkflowEditor';
-export type { WorkflowEditorProps } from './WorkflowEditor';
+export type { WorkflowEditorProps } from './config/types';
 
 // 导出脚本节点组件
 export { default as ScriptNode } from './components/nodes/ScriptNode';

@@ -18,6 +18,8 @@ import {
 import type { ParamDefinition } from '../../../../types';
 import type { OutputDefinition, ParamSource } from '../../../../types/workflow';
 import type { Edge } from '@xyflow/react';
+import { getParamTypeColor, getOutputTypeColor } from '../../config/colors';
+import { NODE_WIDTH, HANDLE_SIZE } from '../../config/dimensions';
 
 const { Text } = Typography;
 
@@ -56,34 +58,6 @@ export interface ScriptNodeData extends Record<string, unknown> {
   /** 参数配置（参数名 -> 参数来源） */
   paramsConfig?: Record<string, ParamSource>;
 }
-
-/**
- * 获取参数类型的显示颜色
- */
-const getParamTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    file_path: '#fa8c16',
-    directory_path: '#fa8c16',
-    select: '#722ed1',
-    multi_select: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
-
-/**
- * 获取输出类型的显示颜色
- */
-const getOutputTypeColor = (type: string): string => {
-  const colorMap: Record<string, string> = {
-    text: '#1890ff',
-    number: '#52c41a',
-    boolean: '#eb2f96',
-    json: '#722ed1',
-  };
-  return colorMap[type] || '#8c8c8c';
-};
 
 /**
  * 参数类型转换为显示字符串
@@ -184,7 +158,7 @@ const ScriptNode: React.FC<ScriptNodeProps> = ({ data, selected }) => {
     <Card
       size="small"
       style={{
-        width: 280,
+        width: NODE_WIDTH,
         borderColor: selected || data.selected ? token.colorPrimary : token.colorBorder,
         borderWidth: selected || data.selected ? 2 : 1,
         boxShadow: selected || data.selected
@@ -262,8 +236,8 @@ const ScriptNode: React.FC<ScriptNodeProps> = ({ data, selected }) => {
                   id={`input-${param.name}`}
                   style={{
                     left: 0,
-                    width: 10,
-                    height: 10,
+                    width: HANDLE_SIZE,
+                    height: HANDLE_SIZE,
                     borderRadius: '50%',
                     background: getParamTypeColor(paramTypeToString(param.type)),
                     border: `2px solid ${token.colorBgContainer}`,
@@ -333,8 +307,8 @@ const ScriptNode: React.FC<ScriptNodeProps> = ({ data, selected }) => {
                 id={`output-${output.name}`}
                 style={{
                   right: 0,
-                  width: 10,
-                  height: 10,
+                  width: HANDLE_SIZE,
+                  height: HANDLE_SIZE,
                   borderRadius: '50%',
                   background: getOutputTypeColor(output.outputType),
                   border: `2px solid ${token.colorBgContainer}`,
