@@ -74,10 +74,7 @@ pub fn execute_single_node(
 ///
 /// # 返回
 /// 节点执行结果
-fn execute_input_node(
-    node: &WorkflowNode,
-    workflow_params: Value,
-) -> Result<NodeResult, AppError> {
+fn execute_input_node(node: &WorkflowNode, workflow_params: Value) -> Result<NodeResult, AppError> {
     let mut outputs: HashMap<String, Value> = HashMap::new();
 
     // 从工作流参数中提取对应的值
@@ -85,10 +82,9 @@ fn execute_input_node(
         for (param_name, source) in &node.params_config {
             let value = match source {
                 ParamSource::Static { value } => value.clone(),
-                ParamSource::FromInput { param_name: name } => params_map
-                    .get(name)
-                    .cloned()
-                    .unwrap_or(Value::Null),
+                ParamSource::FromInput { param_name: name } => {
+                    params_map.get(name).cloned().unwrap_or(Value::Null)
+                }
                 ParamSource::FromNodeOutput { .. } => {
                     // Input 节点不应从其他节点获取输入
                     Value::Null
@@ -194,9 +190,9 @@ fn execute_script_node(
         .as_ref()
         .ok_or_else(|| AppError::NodeExecutionError(format!("节点缺少 script_id: {}", node.id)))?;
 
-    let script = registry.get(script_id).ok_or_else(|| {
-        AppError::NodeExecutionError(format!("脚本不存在: {}", script_id))
-    })?;
+    let script = registry
+        .get(script_id)
+        .ok_or_else(|| AppError::NodeExecutionError(format!("脚本不存在: {}", script_id)))?;
 
     // 获取脚本的参数定义，用于确定所有需要的参数
     let params_schema = script.params_schema();
@@ -222,13 +218,11 @@ fn execute_script_node(
                 ParamSource::FromNodeOutput {
                     node_id,
                     output_field,
-                } => {
-                    completed_outputs
-                        .get(node_id)
-                        .and_then(|outputs| outputs.get(output_field))
-                        .cloned()
-                        .unwrap_or(Value::Null)
-                }
+                } => completed_outputs
+                    .get(node_id)
+                    .and_then(|outputs| outputs.get(output_field))
+                    .cloned()
+                    .unwrap_or(Value::Null),
                 // 优先级2：静态值
                 ParamSource::Static { value } => value.clone(),
                 // 优先级3：来自工作流入参
@@ -263,13 +257,11 @@ fn execute_script_node(
             ParamSource::FromNodeOutput {
                 node_id,
                 output_field,
-            } => {
-                completed_outputs
-                    .get(node_id)
-                    .and_then(|outputs| outputs.get(output_field))
-                    .cloned()
-                    .unwrap_or(Value::Null)
-            }
+            } => completed_outputs
+                .get(node_id)
+                .and_then(|outputs| outputs.get(output_field))
+                .cloned()
+                .unwrap_or(Value::Null),
             ParamSource::Static { value } => value.clone(),
             ParamSource::FromInput { param_name: name } => workflow_params_map
                 .get(name)

@@ -69,7 +69,10 @@ pub fn topological_sort(
         in_degree.entry(node.clone()).or_insert(0);
         for dep in deps {
             *in_degree.entry(node.clone()).or_insert(0) += 1;
-            reverse_graph.entry(dep.clone()).or_default().push(node.clone());
+            reverse_graph
+                .entry(dep.clone())
+                .or_default()
+                .push(node.clone());
         }
     }
 

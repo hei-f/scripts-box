@@ -107,6 +107,8 @@ export interface WorkflowInfo {
   name: string;
   /** 工作流描述 */
   description?: string;
+  /** 节点数量 */
+  nodeCount: number;
   /** 创建时间（Unix 时间戳，毫秒） */
   createdAt: number;
   /** 更新时间（Unix 时间戳，毫秒） */

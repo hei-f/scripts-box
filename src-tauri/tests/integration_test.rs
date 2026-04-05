@@ -51,7 +51,10 @@ fn test_execute_add_numbers() {
     println!("成功: {}", result.success);
 
     assert!(result.success, "脚本执行应该成功");
-    assert!(result.output.contains(&format!("{}", a + b)), "输出应包含正确结果");
+    assert!(
+        result.output.contains(&format!("{}", a + b)),
+        "输出应包含正确结果"
+    );
 }
 
 /// 测试文件重命名脚本参数验证
@@ -84,7 +87,12 @@ fn test_list_all_scripts() {
     println!("{:<20} {:<30} {}", "ID", "名称", "描述");
     println!("{}", "-".repeat(80));
     for script in &scripts {
-        println!("{:<20} {:<30} {}", script.id(), script.name(), script.description());
+        println!(
+            "{:<20} {:<30} {}",
+            script.id(),
+            script.name(),
+            script.description()
+        );
     }
 
     assert!(!scripts.is_empty(), "应该有注册的脚本");
@@ -112,7 +120,7 @@ fn test_add_numbers_batch() {
     for (a, b, expected) in test_cases {
         let params = serde_json::json!({ "a": a, "b": b });
         let result = script.execute(params, &ctx).expect("执行失败");
-        
+
         println!("{:<10} {:<10} {:<10} {}", a, b, expected, result.output);
         assert!(result.success, "脚本应该成功执行");
     }

@@ -10,8 +10,11 @@ use crate::error::AppError;
 use crate::registry::ScriptRegistry;
 use crate::script_api::{OutputDefinition, ParamDefinition, ParamType, Script, ScriptContext};
 
-use super::super::{NodeResult, NodeType, ParamSource, Workflow, WorkflowNode};
-use super::{dependency::build_dependency_graph, dependency::topological_sort, validation::WorkflowValidator, WorkflowExecutor};
+use super::super::{NodePosition, NodeResult, NodeType, ParamSource, Workflow, WorkflowNode};
+use super::{
+    dependency::build_dependency_graph, dependency::topological_sort,
+    validation::WorkflowValidator, WorkflowExecutor,
+};
 
 /// 测试脚本：返回固定值
 struct TestScript {
@@ -100,14 +103,14 @@ fn test_build_dependency_graph() {
                 id: "node1".to_string(),
                 node_type: NodeType::Input,
                 script_id: None,
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
             WorkflowNode {
                 id: "node2".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -182,14 +185,14 @@ fn test_validate_workflow_duplicate_node_id() {
                 id: "node1".to_string(),
                 node_type: NodeType::Input,
                 script_id: None,
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
             WorkflowNode {
                 id: "node1".to_string(), // 重复 ID
                 node_type: NodeType::Input,
                 script_id: None,
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
         ],
@@ -215,7 +218,7 @@ fn test_validate_workflow_missing_script() {
             id: "node1".to_string(),
             node_type: NodeType::Script,
             script_id: Some("nonexistent".to_string()),
-            position: (0.0, 0.0),
+            position: NodePosition { x: 0.0, y: 0.0 },
             params_config: HashMap::new(),
         }],
         edges: vec![],
@@ -242,7 +245,7 @@ fn test_execute_simple_workflow() {
                 id: "input".to_string(),
                 node_type: NodeType::Input,
                 script_id: None,
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -258,7 +261,7 @@ fn test_execute_simple_workflow() {
                 id: "double".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -275,7 +278,7 @@ fn test_execute_simple_workflow() {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (200.0, 0.0),
+                position: NodePosition { x: 200.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -334,12 +337,14 @@ fn test_param_priority_from_node_output() {
                 id: "first".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
                         "input".to_string(),
-                        ParamSource::Static { value: serde_json::json!(5) },
+                        ParamSource::Static {
+                            value: serde_json::json!(5),
+                        },
                     );
                     config
                 },
@@ -348,7 +353,7 @@ fn test_param_priority_from_node_output() {
                 id: "second".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -365,7 +370,7 @@ fn test_param_priority_from_node_output() {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (200.0, 0.0),
+                position: NodePosition { x: 200.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -389,7 +394,9 @@ fn test_param_priority_from_node_output() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({})).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({}))
+        .unwrap();
     assert!(result.success);
     // 5 * 2 * 2 = 20
     assert_eq!(result.outputs.get("result").unwrap(), 20);
@@ -410,12 +417,14 @@ fn test_param_priority_static_value() {
                 id: "script".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
                         "input".to_string(),
-                        ParamSource::Static { value: serde_json::json!(7) },
+                        ParamSource::Static {
+                            value: serde_json::json!(7),
+                        },
                     );
                     config
                 },
@@ -424,7 +433,7 @@ fn test_param_priority_static_value() {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -448,7 +457,9 @@ fn test_param_priority_static_value() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "input": 100 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "input": 100 }))
+        .unwrap();
     assert!(result.success);
     // 静态值 7，而不是工作流入参 100
     assert_eq!(result.outputs.get("result").unwrap(), 14);
@@ -469,7 +480,7 @@ fn test_param_priority_from_input() {
                 id: "script".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -485,7 +496,7 @@ fn test_param_priority_from_input() {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -517,7 +528,9 @@ fn test_param_priority_from_input() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "my_number": 8 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "my_number": 8 }))
+        .unwrap();
     assert!(result.success);
     // 8 * 2 = 16
     assert_eq!(result.outputs.get("result").unwrap(), 16);
@@ -538,14 +551,14 @@ fn test_param_auto_fetch_from_workflow_input() {
                 id: "script".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
             WorkflowNode {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -577,7 +590,9 @@ fn test_param_auto_fetch_from_workflow_input() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "input": 9 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "input": 9 }))
+        .unwrap();
     assert!(result.success);
     // 9 * 2 = 18
     assert_eq!(result.outputs.get("result").unwrap(), 18);
@@ -600,7 +615,7 @@ fn test_legacy_workflow_with_input_node() {
                 id: "input_node".to_string(),
                 node_type: NodeType::Input,
                 script_id: None,
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -616,7 +631,7 @@ fn test_legacy_workflow_with_input_node() {
                 id: "script_node".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -633,7 +648,7 @@ fn test_legacy_workflow_with_input_node() {
                 id: "output_node".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (200.0, 0.0),
+                position: NodePosition { x: 200.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -665,7 +680,9 @@ fn test_legacy_workflow_with_input_node() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "number": 6 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "number": 6 }))
+        .unwrap();
     assert!(result.success);
     // 6 * 2 = 12
     assert_eq!(result.outputs.get("result").unwrap(), 12);
@@ -681,24 +698,22 @@ fn test_legacy_workflow_output_from_input() {
         id: "legacy_direct_output".to_string(),
         name: "旧版直接输出".to_string(),
         description: Some("Output 节点直接从工作流入参获取值".to_string()),
-        nodes: vec![
-            WorkflowNode {
-                id: "output".to_string(),
-                node_type: NodeType::Output,
-                script_id: None,
-                position: (0.0, 0.0),
-                params_config: {
-                    let mut config = HashMap::new();
-                    config.insert(
-                        "result".to_string(),
-                        ParamSource::FromInput {
-                            param_name: "value".to_string(),
-                        },
-                    );
-                    config
-                },
+        nodes: vec![WorkflowNode {
+            id: "output".to_string(),
+            node_type: NodeType::Output,
+            script_id: None,
+            position: NodePosition { x: 0.0, y: 0.0 },
+            params_config: {
+                let mut config = HashMap::new();
+                config.insert(
+                    "result".to_string(),
+                    ParamSource::FromInput {
+                        param_name: "value".to_string(),
+                    },
+                );
+                config
             },
-        ],
+        }],
         edges: vec![],
         input_schema: vec![ParamDefinition {
             name: "value".to_string(),
@@ -717,7 +732,9 @@ fn test_legacy_workflow_output_from_input() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "value": 42 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "value": 42 }))
+        .unwrap();
     assert!(result.success);
     assert_eq!(result.outputs.get("result").unwrap(), 42);
 }
@@ -737,7 +754,7 @@ fn test_new_workflow_without_input_node() {
                 id: "script1".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -753,7 +770,7 @@ fn test_new_workflow_without_input_node() {
                 id: "script2".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("double".to_string()),
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -770,7 +787,7 @@ fn test_new_workflow_without_input_node() {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (200.0, 0.0),
+                position: NodePosition { x: 200.0, y: 0.0 },
                 params_config: {
                     let mut config = HashMap::new();
                     config.insert(
@@ -802,7 +819,9 @@ fn test_new_workflow_without_input_node() {
         }],
     };
 
-    let result = executor.execute_workflow(workflow, serde_json::json!({ "my_input": 11 })).unwrap();
+    let result = executor
+        .execute_workflow(workflow, serde_json::json!({ "my_input": 11 }))
+        .unwrap();
     assert!(result.success);
     // 11 * 2 * 2 = 44
     assert_eq!(result.outputs.get("final_result").unwrap(), 44);

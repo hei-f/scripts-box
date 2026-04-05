@@ -44,6 +44,17 @@ pub enum ParamSource {
     },
 }
 
+/// 节点位置结构体
+///
+/// 表示节点在画布上的坐标位置
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NodePosition {
+    /// X 坐标
+    pub x: f64,
+    /// Y 坐标
+    pub y: f64,
+}
+
 /// 工作流节点结构体
 ///
 /// 表示工作流中的一个节点，包含节点类型、位置和参数配置
@@ -57,8 +68,8 @@ pub struct WorkflowNode {
     /// 脚本 ID（仅 Script 类型节点有效）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_id: Option<String>,
-    /// 节点在画布上的位置 (x, y)
-    pub position: (f64, f64),
+    /// 节点在画布上的位置
+    pub position: NodePosition,
     /// 参数配置，键为参数名，值为参数来源
     #[serde(default)]
     pub params_config: HashMap<String, ParamSource>,
@@ -124,6 +135,8 @@ pub struct WorkflowInfo {
     pub created_at: i64,
     /// 更新时间戳（毫秒）
     pub updated_at: i64,
+    /// 节点数量
+    pub node_count: usize,
 }
 
 /// 节点执行结果
@@ -169,7 +182,7 @@ pub struct WorkflowResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::script_api::{ParamType, OutputType};
+    use crate::script_api::{OutputType, ParamType};
 
     #[test]
     fn test_node_type_serialization() {
@@ -253,7 +266,10 @@ mod tests {
 
         let parsed: ParamSource = serde_json::from_str(&json).unwrap();
         match parsed {
-            ParamSource::FromNodeOutput { node_id, output_field } => {
+            ParamSource::FromNodeOutput {
+                node_id,
+                output_field,
+            } => {
                 assert_eq!(node_id, "node_1");
                 assert_eq!(output_field, "result");
             }
@@ -275,7 +291,7 @@ mod tests {
             id: "node_1".to_string(),
             node_type: NodeType::Script,
             script_id: Some("add_numbers".to_string()),
-            position: (100.0, 200.0),
+            position: NodePosition { x: 100.0, y: 200.0 },
             params_config,
         };
 
@@ -290,7 +306,8 @@ mod tests {
         assert_eq!(parsed.id, "node_1");
         assert_eq!(parsed.node_type, NodeType::Script);
         assert_eq!(parsed.script_id, Some("add_numbers".to_string()));
-        assert_eq!(parsed.position, (100.0, 200.0));
+        assert_eq!(parsed.position.x, 100.0);
+        assert_eq!(parsed.position.y, 200.0);
     }
 
     #[test]
@@ -322,7 +339,7 @@ mod tests {
             id: "input_1".to_string(),
             node_type: NodeType::Input,
             script_id: None,
-            position: (0.0, 0.0),
+            position: NodePosition { x: 0.0, y: 0.0 },
             params_config: HashMap::new(),
         };
 
@@ -374,6 +391,7 @@ mod tests {
             description: Some("描述".to_string()),
             created_at: 1712304000000,
             updated_at: 1712304000000,
+            node_count: 3,
         };
 
         let json = serde_json::to_string(&info).unwrap();
@@ -381,10 +399,12 @@ mod tests {
         assert!(json.contains("测试工作流"));
         assert!(json.contains("createdAt"));
         assert!(json.contains("updatedAt"));
+        assert!(json.contains("nodeCount"));
 
         let parsed: WorkflowInfo = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.id, "workflow_1");
         assert_eq!(parsed.created_at, 1712304000000);
+        assert_eq!(parsed.node_count, 3);
     }
 
     #[test]
@@ -472,7 +492,7 @@ mod tests {
             id: "input_1".to_string(),
             node_type: NodeType::Input,
             script_id: None,
-            position: (0.0, 0.0),
+            position: NodePosition { x: 0.0, y: 0.0 },
             params_config: HashMap::new(),
         };
 
