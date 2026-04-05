@@ -6,11 +6,11 @@ import {
   clearLogBuffer,
   getBufferSize,
   logErrorWithContext,
-} from './actionLogBuffer';
-import * as tauri from './tauri';
+} from '../actionLogBuffer';
+import * as tauri from '../tauri';
 
 // Mock tauri 服务
-vi.mock('./tauri', () => ({
+vi.mock('../tauri', () => ({
   logFrontendError: vi.fn(),
 }));
 

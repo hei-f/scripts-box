@@ -5,11 +5,11 @@ import {
   logPromiseRejection,
   withActionLog,
   ErrorType,
-} from './errorLogger';
-import * as actionLogBuffer from './actionLogBuffer';
+} from '../errorLogger';
+import * as actionLogBuffer from '../actionLogBuffer';
 
 // Mock actionLogBuffer
-vi.mock('./actionLogBuffer', () => ({
+vi.mock('../actionLogBuffer', () => ({
   logErrorWithContext: vi.fn(),
   logAction: vi.fn(),
   clearLogBuffer: vi.fn(),

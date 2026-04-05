@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import SettingsPage from './index';
+import SettingsPage from '..';
 
 // 默认的应用配置
 // 注意：CloseBehavior 使用 camelCase 格式，与 Rust 后端 serde(rename_all = "camelCase") 保持一致

@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
-import QuickExecutionPage from './index';
+import QuickExecutionPage from '..';
 
 // 默认的脚本列表
 const mockScriptInfos = [
