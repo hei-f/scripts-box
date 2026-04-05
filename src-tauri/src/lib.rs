@@ -163,7 +163,7 @@ pub fn run() {
                     // 从状态中获取应用配置
                     let state = window.try_state::<Mutex<AppConfigManager>>();
                     if let Some(state) = state {
-                        let manager = state.lock().unwrap();
+                        let manager = state.lock().unwrap_or_else(|e| e.into_inner());
                         let close_behavior = manager.get_config().window.close_behavior.clone();
                         drop(manager); // 释放锁
 
