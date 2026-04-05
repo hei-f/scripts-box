@@ -2,6 +2,8 @@
 //!
 //! 提供前端调用后端错误日志功能的 Tauri 命令
 
+use std::sync::Mutex;
+
 use tauri::State;
 
 use crate::db::{Database, ErrorLog};
@@ -19,12 +21,12 @@ use crate::error::AppError;
 /// # 返回
 /// 成功返回记录 ID，失败返回 AppError
 #[tauri::command]
-pub async fn log_frontend_error(
+pub fn log_frontend_error(
     error_type: String,
     message: String,
     stack_trace: Option<String>,
     context: Option<String>,
-    db: State<'_, Database>,
+    db: State<'_, Mutex<Database>>,
 ) -> Result<i64, AppError> {
     let created_at = chrono::Utc::now().timestamp_millis();
 
@@ -38,6 +40,7 @@ pub async fn log_frontend_error(
         created_at,
     };
 
+    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.insert_error_log(log)
 }
 
@@ -50,11 +53,12 @@ pub async fn log_frontend_error(
 /// # 返回
 /// 成功返回错误日志列表，失败返回 AppError
 #[tauri::command]
-pub async fn list_error_logs(
+pub fn list_error_logs(
     limit: Option<i64>,
-    db: State<'_, Database>,
+    db: State<'_, Mutex<Database>>,
 ) -> Result<Vec<ErrorLog>, AppError> {
     let limit = limit.unwrap_or(100);
+    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.list_error_logs(limit)
 }
 
@@ -66,7 +70,8 @@ pub async fn list_error_logs(
 /// # 返回
 /// 成功返回 ()，失败返回 AppError
 #[tauri::command]
-pub async fn clear_error_logs(db: State<'_, Database>) -> Result<(), AppError> {
+pub fn clear_error_logs(db: State<'_, Mutex<Database>>) -> Result<(), AppError> {
+    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.clear_error_logs()
 }
 
@@ -81,10 +86,11 @@ pub async fn clear_error_logs(db: State<'_, Database>) -> Result<(), AppError> {
 /// # 返回
 /// 成功返回删除的记录数，失败返回 AppError
 #[tauri::command]
-pub async fn cleanup_old_error_logs(
+pub fn cleanup_old_error_logs(
     days_to_keep: Option<i64>,
-    db: State<'_, Database>,
+    db: State<'_, Mutex<Database>>,
 ) -> Result<usize, AppError> {
     let days = days_to_keep.unwrap_or(7);
+    let db = db.lock().map_err(|e| AppError::DatabaseError(format!("数据库锁定失败: {}", e)))?;
     db.cleanup_old_error_logs(days)
 }
