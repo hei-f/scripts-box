@@ -11,8 +11,14 @@ fn test_param_type_serialization() {
 
     let param_type = ParamType::Select {
         options: vec![
-            SelectOption { value: "opt1".to_string(), label: "选项1".to_string() },
-            SelectOption { value: "opt2".to_string(), label: "选项2".to_string() },
+            SelectOption {
+                value: "opt1".to_string(),
+                label: "选项1".to_string(),
+            },
+            SelectOption {
+                value: "opt2".to_string(),
+                label: "选项2".to_string(),
+            },
         ],
     };
     let json = serde_json::to_string(&param_type).unwrap();
@@ -136,8 +142,14 @@ fn test_param_type_deserialization() {
 fn test_select_param_type_serialization() {
     let param_type = ParamType::Select {
         options: vec![
-            SelectOption { value: "a".to_string(), label: "A".to_string() },
-            SelectOption { value: "b".to_string(), label: "B".to_string() },
+            SelectOption {
+                value: "a".to_string(),
+                label: "A".to_string(),
+            },
+            SelectOption {
+                value: "b".to_string(),
+                label: "B".to_string(),
+            },
         ],
     };
     let json = serde_json::to_string(&param_type).unwrap();
@@ -149,9 +161,10 @@ fn test_select_param_type_serialization() {
 #[test]
 fn test_multi_select_param_type_serialization() {
     let param_type = ParamType::MultiSelect {
-        options: vec![
-            SelectOption { value: "x".to_string(), label: "X".to_string() },
-        ],
+        options: vec![SelectOption {
+            value: "x".to_string(),
+            label: "X".to_string(),
+        }],
     };
     let json = serde_json::to_string(&param_type).unwrap();
     let parsed: serde_json::Value = serde_json::from_str(&json).unwrap();

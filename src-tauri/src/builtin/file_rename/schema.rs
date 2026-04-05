@@ -2,7 +2,9 @@
 
 use serde_json::Value;
 
-use crate::script_api::{DisplayCondition, OutputDefinition, OutputType, ParamDefinition, ParamType, SelectOption};
+use crate::script_api::{
+    DisplayCondition, OutputDefinition, OutputType, ParamDefinition, ParamType, SelectOption,
+};
 
 /// 获取重命名模式选项
 pub fn get_rename_mode_options() -> Vec<SelectOption> {

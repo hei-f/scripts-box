@@ -131,7 +131,10 @@ fn test_invalid_directory() {
     let result = script.execute(params, &ctx);
 
     assert!(result.is_err());
-    assert!(matches!(result, Err(crate::error::AppError::ValidationError(_))));
+    assert!(matches!(
+        result,
+        Err(crate::error::AppError::ValidationError(_))
+    ));
 }
 
 #[test]

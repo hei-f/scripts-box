@@ -146,7 +146,10 @@ mod tests {
     fn test_serialize_all_variants() {
         // 测试所有错误类型的序列化
         let errors = vec![
-            AppError::IoError(io::Error::new(io::ErrorKind::PermissionDenied, "permission denied")),
+            AppError::IoError(io::Error::new(
+                io::ErrorKind::PermissionDenied,
+                "permission denied",
+            )),
             AppError::DatabaseError("db error".to_string()),
             AppError::ConfigError("config error".to_string()),
             AppError::ScriptError("script error".to_string()),

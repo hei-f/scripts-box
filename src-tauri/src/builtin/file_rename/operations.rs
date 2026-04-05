@@ -25,9 +25,8 @@ pub fn execute_rename(
     let mut fail_count = 0;
 
     // 读取目录内容
-    let entries = fs::read_dir(directory).map_err(|e| {
-        AppError::FileSystemError(format!("无法读取目录 {:?}: {}", directory, e))
-    })?;
+    let entries = fs::read_dir(directory)
+        .map_err(|e| AppError::FileSystemError(format!("无法读取目录 {:?}: {}", directory, e)))?;
 
     // 过滤出文件（排除目录）
     let mut files: Vec<_> = entries
@@ -91,7 +90,9 @@ pub fn execute_rename(
             let new_text = params["new_text"].as_str().unwrap_or("");
 
             if old_text.is_empty() {
-                return Err(AppError::ValidationError("要替换的文本不能为空".to_string()));
+                return Err(AppError::ValidationError(
+                    "要替换的文本不能为空".to_string(),
+                ));
             }
 
             for entry in files {

@@ -7,7 +7,9 @@ use std::collections::HashMap;
 use serde_json::Value;
 
 use crate::error::AppError;
-use crate::script_api::{OutputDefinition, OutputType, ParamDefinition, ParamType, Script, ScriptContext, ScriptResult};
+use crate::script_api::{
+    OutputDefinition, OutputType, ParamDefinition, ParamType, Script, ScriptContext, ScriptResult,
+};
 
 /// 数字加法脚本
 pub struct AddNumbersScript;
@@ -20,9 +22,9 @@ impl AddNumbersScript {
 
     /// 解析并验证数字参数
     fn parse_number(value: &Value, param_name: &str) -> Result<f64, AppError> {
-        let num = value
-            .as_f64()
-            .ok_or_else(|| AppError::ValidationError(format!("参数 {} 必须是有效数字", param_name)))?;
+        let num = value.as_f64().ok_or_else(|| {
+            AppError::ValidationError(format!("参数 {} 必须是有效数字", param_name))
+        })?;
 
         if num.is_nan() || num.is_infinite() {
             return Err(AppError::ValidationError(format!(

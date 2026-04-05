@@ -44,7 +44,10 @@ fn main() {
             println!("提示: 直接运行脚本需要 Tauri 环境。");
             println!("请使用以下测试命令代替:");
             println!();
-            println!("  cargo test --manifest-path src-tauri/Cargo.toml {}", script_id);
+            println!(
+                "  cargo test --manifest-path src-tauri/Cargo.toml {}",
+                script_id
+            );
             println!();
             println!("参数 JSON: {}", params_json);
         }

@@ -25,7 +25,8 @@ impl FileRenameScript {
         Self {
             id: "file_rename".to_string(),
             name: "文件批量重命名".to_string(),
-            description: "批量重命名指定目录下的文件，支持添加前缀、后缀、文本替换和编号等功能".to_string(),
+            description: "批量重命名指定目录下的文件，支持添加前缀、后缀、文本替换和编号等功能"
+                .to_string(),
         }
     }
 }
@@ -59,9 +60,9 @@ impl Script for FileRenameScript {
 
     fn execute(&self, params: Value, _ctx: &ScriptContext) -> Result<ScriptResult, AppError> {
         // 获取目标目录
-        let directory_str = params["directory"].as_str().ok_or_else(|| {
-            AppError::ValidationError("请选择目标目录".to_string())
-        })?;
+        let directory_str = params["directory"]
+            .as_str()
+            .ok_or_else(|| AppError::ValidationError("请选择目标目录".to_string()))?;
         let directory = Path::new(directory_str);
 
         // 验证目录存在
@@ -80,9 +81,8 @@ impl Script for FileRenameScript {
 
         // 获取重命名模式
         let mode_str = params["mode"].as_str().unwrap_or("add_prefix");
-        let mode = RenameMode::from_str(mode_str).ok_or_else(|| {
-            AppError::ValidationError(format!("无效的重命名模式: {}", mode_str))
-        })?;
+        let mode = RenameMode::from_str(mode_str)
+            .ok_or_else(|| AppError::ValidationError(format!("无效的重命名模式: {}", mode_str)))?;
 
         // 执行重命名
         let (success_count, fail_count) = execute_rename(directory, mode, &params)?;
@@ -95,7 +95,10 @@ impl Script for FileRenameScript {
 
         // 构建结构化输出
         let mut outputs = HashMap::new();
-        outputs.insert("success_count".to_string(), serde_json::json!(success_count));
+        outputs.insert(
+            "success_count".to_string(),
+            serde_json::json!(success_count),
+        );
         outputs.insert("fail_count".to_string(), serde_json::json!(fail_count));
 
         if fail_count > 0 {
