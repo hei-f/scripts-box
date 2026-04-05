@@ -2,7 +2,7 @@
 name = "scripts-box"
 version = "0.2.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["hei-f"]
 edition = "2021"
 default-run = "scripts-box"
 
