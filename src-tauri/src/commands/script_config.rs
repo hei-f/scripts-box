@@ -7,25 +7,58 @@ use tauri::State;
 
 use crate::config::{ScriptConfig, ScriptConfigManager};
 use crate::error::AppError;
+use crate::registry::ScriptRegistry;
+
+/// 内置脚本命令类型常量
+const BUILTIN_COMMAND_TYPE: &str = "builtin";
 
 /// 列出所有脚本配置
 ///
-/// 获取当前系统中所有脚本配置的列表
+/// 获取当前系统中所有脚本配置的列表，合并 ScriptConfigManager 中的配置和 ScriptRegistry 中的内置脚本
 ///
 /// # 参数
-/// - `state`: 脚本配置管理器的共享状态
+/// - `config_state`: 脚本配置管理器的共享状态
+/// - `registry_state`: 脚本注册中心的共享状态
 ///
 /// # 返回
 /// 成功返回脚本配置列表，失败返回 AppError
 #[tauri::command]
 pub fn list_script_configs(
-    state: State<'_, Mutex<ScriptConfigManager>>,
+    config_state: State<'_, Mutex<ScriptConfigManager>>,
+    registry_state: State<'_, Mutex<ScriptRegistry>>,
 ) -> Result<Vec<ScriptConfig>, AppError> {
-    let manager = state.lock().map_err(|e| {
+    // 获取配置管理器中的脚本配置
+    let config_manager = config_state.lock().map_err(|e| {
         AppError::ConfigError(format!("获取配置管理器锁失败: {}", e))
     })?;
+    let mut scripts: Vec<ScriptConfig> = config_manager.list_scripts().to_vec();
+    drop(config_manager); // 释放锁
 
-    Ok(manager.list_scripts().to_vec())
+    // 获取脚本注册中心中的内置脚本
+    let registry = registry_state.lock().map_err(|e| {
+        AppError::ConfigError(format!("获取脚本注册中心锁失败: {}", e))
+    })?;
+    
+    // 合并内置脚本（如果配置管理器中不存在则添加）
+    for script in registry.list() {
+        // 检查是否已存在相同 ID 的脚本配置
+        let exists = scripts.iter().any(|s| s.id == script.id());
+        if !exists {
+            // 从 Script trait 构建 ScriptConfig
+            let config = ScriptConfig {
+                id: script.id().to_string(),
+                name: script.name().to_string(),
+                description: Some(script.description().to_string()),
+                params: script.params_schema(),
+                enabled: true,
+                command_type: BUILTIN_COMMAND_TYPE.to_string(),
+                outputs: script.output_schema(),
+            };
+            scripts.push(config);
+        }
+    }
+
+    Ok(scripts)
 }
 
 /// 获取单个脚本配置

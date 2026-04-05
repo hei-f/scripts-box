@@ -16,6 +16,9 @@ import BuiltinScriptsPage from '../pages/BuiltinScripts';
 import HistoryPage from '../pages/History';
 import SettingsPage from '../pages/Settings';
 import QuickExecutionPage from '../pages/QuickExecution';
+import WorkflowListPage from '../pages/Workflow';
+import WorkflowEditorPage from '../pages/Workflow/Editor';
+import DevToolsPage from '../pages/DevTools';
 
 /**
  * 主窗口路由配置
@@ -37,7 +40,19 @@ const mainRouter = createHashRouter([
         path: 'settings',
         element: <SettingsPage />,
       },
+      {
+        path: 'workflows',
+        element: <WorkflowListPage />,
+      },
     ],
+  },
+  {
+    path: '/workflows/new',
+    element: <WorkflowEditorPage />,
+  },
+  {
+    path: '/workflows/:id/edit',
+    element: <WorkflowEditorPage />,
   },
 ]);
 
@@ -48,6 +63,16 @@ const quickExecutionRouter = createHashRouter([
   {
     path: '/',
     element: <QuickExecutionPage />,
+  },
+]);
+
+/**
+ * 开发者工具窗口路由配置
+ */
+const devToolsRouter = createHashRouter([
+  {
+    path: '/',
+    element: <DevToolsPage />,
   },
 ]);
 
@@ -63,7 +88,13 @@ const AppRouter: React.FC = () => {
     (window.location.search.includes('window=quick-execution') ||
      window.location.hash.includes('window=quick-execution'));
 
-  const router = isQuickExecution ? quickExecutionRouter : mainRouter;
+  const isDevTools = typeof window !== 'undefined' &&
+    (window.location.search.includes('window=devtools') ||
+     window.location.hash.includes('window=devtools'));
+
+  const router = isDevTools ? devToolsRouter :
+                 isQuickExecution ? quickExecutionRouter :
+                 mainRouter;
   return <RouterProvider router={router} />;
 };
 

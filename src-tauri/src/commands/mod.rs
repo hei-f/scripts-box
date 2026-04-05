@@ -7,6 +7,7 @@ pub mod error_log;
 pub mod history;
 pub mod script_config;
 pub mod script_execution;
+pub mod workflow;
 
 // 重导出命令函数，方便在 generate_handler! 中使用
 pub use app_config::{
@@ -18,9 +19,14 @@ pub use app_config::{
 };
 pub use error_log::{
     cleanup_old_error_logs,
+    clear_debug_log,
     clear_error_logs,
+    emit_devtools_log,
     list_error_logs,
     log_frontend_error,
+    open_devtools_window,
+    read_debug_log,
+    write_debug_log,
 };
 pub use history::{
     clear_execution_history,
@@ -38,4 +44,13 @@ pub use script_execution::{
     execute_script,
     get_script_params,
     list_scripts,
+};
+pub use workflow::{
+    create_workflow,
+    delete_workflow,
+    execute_workflow,
+    get_script_output_schema,
+    get_workflow,
+    list_workflows,
+    update_workflow,
 };

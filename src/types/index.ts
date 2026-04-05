@@ -14,6 +14,20 @@ export type {
   WindowConfig,
 } from './appConfig';
 
+// 先导出工作流相关类型，因为 ScriptConfig 依赖 OutputDefinition
+export type {
+  NodeType,
+  OutputType,
+  ParamSource,
+  WorkflowNode,
+  WorkflowEdge,
+  OutputDefinition,
+  Workflow,
+  WorkflowInfo,
+  NodeResult,
+  WorkflowResult,
+} from './workflow';
+
 /**
  * 选择项定义
  */
@@ -119,6 +133,8 @@ export interface ScriptConfig {
   enabled: boolean;
   /** 命令类型 */
   commandType: string;
+  /** 输出定义列表 */
+  outputs: import('./workflow').OutputDefinition[];
 }
 
 /**
@@ -144,3 +160,5 @@ export interface ExecutionRecord {
   /** 执行时长（毫秒） */
   durationMs?: number;
 }
+
+// 工作流类型已在文件开头导出

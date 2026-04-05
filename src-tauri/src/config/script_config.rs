@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 use crate::error::AppError;
-use crate::script_api::ParamDefinition;
+use crate::script_api::{OutputDefinition, ParamDefinition};
 
 /// 配置文件版本号常量
 const CONFIG_VERSION: &str = "1.0";
@@ -48,6 +48,12 @@ pub struct ScriptConfig {
     ///
     /// 标识脚本的实现类型，如 builtin（内置命令）、python（Python 脚本）等
     pub command_type: String,
+
+    /// 输出定义列表
+    ///
+    /// 定义脚本的输出结构，前端据此显示节点的输出端口
+    #[serde(default)]
+    pub outputs: Vec<OutputDefinition>,
 }
 
 /// enabled 字段的默认值函数
@@ -264,6 +270,7 @@ mod tests {
             }],
             enabled: true,
             command_type: "builtin".to_string(),
+            outputs: vec![],
         }
     }
 

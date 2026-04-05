@@ -20,3 +20,6 @@ pub const QUICK_EXECUTION_WINDOW_LABEL: &str = "quick-execution";
 
 /// 主窗口标签
 pub const MAIN_WINDOW_LABEL: &str = "main";
+
+/// 开发者工具窗口标签
+pub const DEVTOOLS_WINDOW_LABEL: &str = "devtools";

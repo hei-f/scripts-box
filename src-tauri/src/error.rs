@@ -38,6 +38,22 @@ pub enum AppError {
     /// 文件系统错误
     #[error("文件系统错误: {0}")]
     FileSystemError(String),
+
+    /// 工作流执行错误
+    #[error("工作流执行错误: {0}")]
+    WorkflowError(String),
+
+    /// 节点执行错误
+    #[error("节点执行错误: {0}")]
+    NodeExecutionError(String),
+
+    /// 工作流验证错误
+    #[error("工作流验证错误: {0}")]
+    WorkflowValidationError(String),
+
+    /// 检测到循环依赖
+    #[error("检测到循环依赖")]
+    CycleDetectedError,
 }
 
 /// 为 AppError 实现 Serialize trait
@@ -59,6 +75,10 @@ impl Serialize for AppError {
             AppError::NotFoundError(msg) => ("NotFoundError", msg.clone()),
             AppError::ValidationError(msg) => ("ValidationError", msg.clone()),
             AppError::FileSystemError(msg) => ("FileSystemError", msg.clone()),
+            AppError::WorkflowError(msg) => ("WorkflowError", msg.clone()),
+            AppError::NodeExecutionError(msg) => ("NodeExecutionError", msg.clone()),
+            AppError::WorkflowValidationError(msg) => ("WorkflowValidationError", msg.clone()),
+            AppError::CycleDetectedError => ("CycleDetectedError", "检测到循环依赖".to_string()),
         };
 
         let mut state = serializer.serialize_struct("AppError", 2)?;
@@ -133,6 +153,10 @@ mod tests {
             AppError::NotFoundError("not found".to_string()),
             AppError::ValidationError("validation error".to_string()),
             AppError::FileSystemError("fs error".to_string()),
+            AppError::WorkflowError("workflow error".to_string()),
+            AppError::NodeExecutionError("node error".to_string()),
+            AppError::WorkflowValidationError("validation error".to_string()),
+            AppError::CycleDetectedError,
         ];
 
         for err in errors {

@@ -2,10 +2,12 @@
 //!
 //! 接收两个数字参数，返回它们的和
 
+use std::collections::HashMap;
+
 use serde_json::Value;
 
 use crate::error::AppError;
-use crate::script_api::{ParamDefinition, ParamType, Script, ScriptContext, ScriptResult};
+use crate::script_api::{OutputDefinition, OutputType, ParamDefinition, ParamType, Script, ScriptContext, ScriptResult};
 
 /// 数字加法脚本
 pub struct AddNumbersScript;
@@ -75,6 +77,15 @@ impl Script for AddNumbersScript {
         ]
     }
 
+    fn output_schema(&self) -> Vec<OutputDefinition> {
+        vec![OutputDefinition {
+            name: "result".to_string(),
+            label: "计算结果".to_string(),
+            output_type: OutputType::Number,
+            description: Some("两个数字相加的结果".to_string()),
+        }]
+    }
+
     fn execute(&self, params: Value, _ctx: &ScriptContext) -> Result<ScriptResult, AppError> {
         // 解析参数 A
         let a = Self::parse_number(&params["a"], "A")?;
@@ -92,7 +103,11 @@ impl Script for AddNumbersScript {
             format!("{} + {} = {}", a, b, result)
         };
 
-        Ok(ScriptResult::success(output))
+        // 构建结构化输出
+        let mut outputs = HashMap::new();
+        outputs.insert("result".to_string(), serde_json::json!(result));
+
+        Ok(ScriptResult::success_with_outputs(output, outputs))
     }
 }
 

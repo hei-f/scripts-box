@@ -7,6 +7,7 @@ pub mod db;
 pub mod error;
 pub mod registry;
 pub mod script_api;
+pub mod workflow;
 
 // 引入标准库和 Tauri 类型
 use std::sync::Mutex;
@@ -28,9 +29,14 @@ use commands::{
     update_window_config,
     // 错误日志相关命令
     cleanup_old_error_logs,
+    clear_debug_log,
     clear_error_logs,
+    emit_devtools_log,
     list_error_logs,
     log_frontend_error,
+    open_devtools_window,
+    read_debug_log,
+    write_debug_log,
     // 脚本配置相关命令
     create_script_config,
     delete_script_config,
@@ -45,12 +51,20 @@ use commands::{
     clear_execution_history,
     delete_execution_history,
     list_execution_history,
+    // 工作流相关命令
+    create_workflow,
+    delete_workflow,
+    execute_workflow,
+    get_script_output_schema,
+    get_workflow,
+    list_workflows,
+    update_workflow,
 };
 
 // 引入状态类型
 use builtin::register_builtin_scripts;
 use config::{AppConfigManager, CloseBehavior, ScriptConfigManager};
-use constants::{MAIN_WINDOW_LABEL, QUICK_EXECUTION_WINDOW_LABEL};
+use constants::{DEVTOOLS_WINDOW_LABEL, MAIN_WINDOW_LABEL, QUICK_EXECUTION_WINDOW_LABEL};
 use db::Database;
 use registry::ScriptRegistry;
 
@@ -75,7 +89,7 @@ pub fn run() {
             let db = Database::init(&config_dir).expect("数据库初始化失败");
 
             // 加载脚本配置管理器
-            let config_manager =
+            let mut config_manager =
                 ScriptConfigManager::load(app_handle).expect("配置管理器加载失败");
 
             // 加载应用配置管理器
@@ -88,6 +102,14 @@ pub fn run() {
             // 构建脚本注册中心并注册内置脚本
             let mut registry = ScriptRegistry::new();
             register_builtin_scripts(&mut registry);
+
+            // 获取内置脚本列表用于同步
+            let builtin_scripts = registry.list();
+
+            // 将内置脚本同步到配置管理器
+            if let Err(e) = config_manager.sync_builtin_scripts(&builtin_scripts) {
+                eprintln!("同步内置脚本到配置管理器失败: {}", e);
+            }
 
             // 注册共享状态
             app.manage(Mutex::new(config_manager));
@@ -158,7 +180,7 @@ pub fn run() {
             // 处理窗口关闭请求事件
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let label = window.label();
-                
+
                 if label == MAIN_WINDOW_LABEL {
                     // 从状态中获取应用配置
                     let state = window.try_state::<Mutex<AppConfigManager>>();
@@ -182,6 +204,10 @@ pub fn run() {
                     // 快速执行窗口关闭时仅隐藏
                     api.prevent_close();
                     let _ = window.hide();
+                } else if label == DEVTOOLS_WINDOW_LABEL {
+                    // 开发者工具窗口关闭时仅隐藏
+                    api.prevent_close();
+                    let _ = window.hide();
                 }
             }
         })
@@ -197,6 +223,11 @@ pub fn run() {
             list_error_logs,
             clear_error_logs,
             cleanup_old_error_logs,
+            write_debug_log,
+            clear_debug_log,
+            read_debug_log,
+            open_devtools_window,
+            emit_devtools_log,
             // 脚本配置相关命令
             list_script_configs,
             get_script_config,
@@ -210,7 +241,15 @@ pub fn run() {
             // 执行历史相关命令
             list_execution_history,
             delete_execution_history,
-            clear_execution_history
+            clear_execution_history,
+            // 工作流相关命令
+            create_workflow,
+            get_workflow,
+            list_workflows,
+            update_workflow,
+            delete_workflow,
+            execute_workflow,
+            get_script_output_schema
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

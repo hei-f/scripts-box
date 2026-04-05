@@ -17,6 +17,10 @@ import type {
   WindowConfig,
   ShortcutConfig,
   TrayConfig,
+  Workflow,
+  WorkflowInfo,
+  WorkflowResult,
+  OutputDefinition,
 } from '../types';
 
 /**
@@ -326,4 +330,133 @@ export function cleanupOldErrorLogs(
   daysToKeep?: number
 ): ResultAsync<number, string> {
   return invokeTauri<number>('cleanup_old_error_logs', { daysToKeep });
+}
+
+/**
+ * 写入调试日志到本地文件
+ *
+ * 日志文件位于应用配置目录下的 debug.log
+ *
+ * @param tag - 日志标签
+ * @param data - 日志数据对象
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function writeDebugLog(
+  tag: string,
+  data: Record<string, unknown>
+): ResultAsync<void, string> {
+  return invokeTauri<void>('write_debug_log', { tag, data: JSON.stringify(data) });
+}
+
+/**
+ * 清空调试日志文件
+ *
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function clearDebugLog(): ResultAsync<void, string> {
+  return invokeTauri<void>('clear_debug_log');
+}
+
+/**
+ * 读取调试日志文件内容
+ *
+ * @returns ResultAsync<string, string> - 成功返回日志内容
+ */
+export function readDebugLog(): ResultAsync<string, string> {
+  return invokeTauri<string>('read_debug_log');
+}
+
+/**
+ * 打开开发者工具窗口
+ *
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function openDevtoolsWindow(): ResultAsync<void, string> {
+  return invokeTauri<void>('open_devtools_window');
+}
+
+/**
+ * 发送实时日志事件到开发者工具窗口
+ *
+ * @param tag - 日志标签
+ * @param data - 日志数据对象
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function emitDevtoolsLog(
+  tag: string,
+  data: Record<string, unknown>
+): ResultAsync<void, string> {
+  return invokeTauri<void>('emit_devtools_log', { tag, data: JSON.stringify(data) });
+}
+
+// ==================== 工作流相关命令 ====================
+
+/**
+ * 创建工作流
+ *
+ * @param workflow - 要创建的工作流配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function createWorkflow(workflow: Workflow): ResultAsync<void, string> {
+  return invokeTauri('create_workflow', { workflow });
+}
+
+/**
+ * 获取工作流
+ *
+ * @param id - 工作流 ID
+ * @returns ResultAsync<Workflow, string> - 成功返回工作流配置
+ */
+export function getWorkflow(id: string): ResultAsync<Workflow, string> {
+  return invokeTauri('get_workflow', { id });
+}
+
+/**
+ * 列出所有工作流元信息
+ *
+ * @returns ResultAsync<WorkflowInfo[], string> - 成功返回工作流元信息列表
+ */
+export function listWorkflows(): ResultAsync<WorkflowInfo[], string> {
+  return invokeTauri('list_workflows');
+}
+
+/**
+ * 更新工作流
+ *
+ * @param workflow - 要更新的工作流配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function updateWorkflow(workflow: Workflow): ResultAsync<void, string> {
+  return invokeTauri('update_workflow', { workflow });
+}
+
+/**
+ * 删除工作流
+ *
+ * @param id - 要删除的工作流 ID
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function deleteWorkflow(id: string): ResultAsync<void, string> {
+  return invokeTauri('delete_workflow', { id });
+}
+
+/**
+ * 执行工作流
+ *
+ * @param id - 工作流 ID
+ * @param params - 工作流参数
+ * @returns ResultAsync<WorkflowResult, string> - 成功返回工作流执行结果
+ */
+export function executeWorkflow(id: string, params: Record<string, unknown>): ResultAsync<WorkflowResult, string> {
+  return invokeTauri('execute_workflow', { id, params });
+}
+
+/**
+ * 获取脚本输出定义
+ *
+ * @param id - 脚本 ID
+ * @returns ResultAsync<OutputDefinition[], string> - 成功返回输出定义列表
+ */
+export function getScriptOutputSchema(id: string): ResultAsync<OutputDefinition[], string> {
+  return invokeTauri('get_script_output_schema', { id });
 }

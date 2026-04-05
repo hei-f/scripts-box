@@ -11,6 +11,7 @@ import {
   AppstoreOutlined,
   HistoryOutlined,
   SettingOutlined,
+  ApartmentOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -36,6 +37,11 @@ const MainLayout: React.FC = () => {
       label: '脚本列表',
     },
     {
+      key: '/workflows',
+      icon: <ApartmentOutlined />,
+      label: '工作流',
+    },
+    {
       key: '/history',
       icon: <HistoryOutlined />,
       label: '执行历史',
@@ -52,6 +58,10 @@ const MainLayout: React.FC = () => {
     // 如果是脚本详情页，选中首页
     if (location.pathname.startsWith('/scripts/')) {
       return '/';
+    }
+    // 如果是工作流编辑页，选中工作流列表
+    if (location.pathname.startsWith('/workflows/') || location.pathname === '/workflows/new') {
+      return '/workflows';
     }
     return location.pathname;
   };

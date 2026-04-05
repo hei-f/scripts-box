@@ -9,6 +9,7 @@ use tauri::{AppHandle, Manager};
 
 use crate::config::script_config::{ScriptConfig, ScriptsConfigFile};
 use crate::error::AppError;
+use crate::script_api::Script;
 
 /// 配置文件名常量
 const SCRIPTS_CONFIG_FILE: &str = "scripts.json";
@@ -21,6 +22,9 @@ const BACKUP_FILE_EXTENSION: &str = ".json";
 
 /// 最大备份文件数量
 const MAX_BACKUP_COUNT: usize = 5;
+
+/// 内置脚本命令类型常量
+const BUILTIN_COMMAND_TYPE: &str = "builtin";
 
 /// 脚本配置管理器
 ///
@@ -261,6 +265,53 @@ impl ScriptConfigManager {
     pub fn list_scripts(&self) -> &[ScriptConfig] {
         &self.config.scripts
     }
+
+    /// 添加内置脚本配置
+    ///
+    /// 如果脚本 ID 已存在，则跳过添加
+    ///
+    /// # 参数
+    /// - `script`: 实现 Script trait 的脚本实例引用
+    ///
+    /// # 返回
+    /// 成功返回 Ok(())，验证失败返回 AppError
+    pub fn add_builtin_script<S: Script + ?Sized>(&mut self, script: &S) -> Result<(), AppError> {
+        // 检查是否已存在相同 ID 的脚本配置
+        if self.get_script(script.id()).is_some() {
+            return Ok(());
+        }
+
+        // 从 Script trait 构建 ScriptConfig
+        let config = ScriptConfig {
+            id: script.id().to_string(),
+            name: script.name().to_string(),
+            description: Some(script.description().to_string()),
+            params: script.params_schema(),
+            enabled: true,
+            command_type: BUILTIN_COMMAND_TYPE.to_string(),
+            outputs: script.output_schema(),
+        };
+
+        // 添加到配置列表
+        self.config.add_script(config)
+    }
+
+    /// 批量同步内置脚本
+    ///
+    /// 遍历脚本列表，将所有内置脚本同步到配置管理器
+    /// 如果脚本 ID 已存在，则跳过
+    ///
+    /// # 参数
+    /// - `scripts`: 内置脚本引用列表
+    ///
+    /// # 返回
+    /// 成功返回 Ok(())，验证失败返回 AppError
+    pub fn sync_builtin_scripts(&mut self, scripts: &[&std::sync::Arc<dyn Script>]) -> Result<(), AppError> {
+        for script in scripts {
+            self.add_builtin_script(script.as_ref())?;
+        }
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -276,5 +327,6 @@ mod tests {
         assert_eq!(BACKUP_FILE_PREFIX, "scripts.backup.");
         assert_eq!(BACKUP_FILE_EXTENSION, ".json");
         assert_eq!(MAX_BACKUP_COUNT, 5);
+        assert_eq!(BUILTIN_COMMAND_TYPE, "builtin");
     }
 }
