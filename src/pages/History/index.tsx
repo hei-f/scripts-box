@@ -189,9 +189,8 @@ const HistoryPage: React.FC = () => {
       title: '脚本 ID',
       dataIndex: 'scriptId',
       key: 'scriptId',
-      width: 150,
+      width: 200,
       copyable: true,
-      ellipsis: true,
     },
     {
       title: '执行状态',
