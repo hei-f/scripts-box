@@ -13,6 +13,10 @@ import type {
   ParamDefinition,
   ScriptResult,
   ExecutionRecord,
+  AppConfig,
+  WindowConfig,
+  ShortcutConfig,
+  TrayConfig,
 } from '../types';
 
 /**
@@ -202,4 +206,124 @@ export function deleteExecutionHistory(id: number): ResultAsync<void, string> {
  */
 export function clearExecutionHistory(scriptId?: string): ResultAsync<void, string> {
   return invokeTauri<void>('clear_execution_history', { scriptId });
+}
+
+// ==================== 应用配置相关命令 ====================
+
+/**
+ * 获取应用配置
+ *
+ * @returns ResultAsync<AppConfig, string> - 成功返回应用配置
+ */
+export function getAppConfig(): ResultAsync<AppConfig, string> {
+  return invokeTauri<AppConfig>('get_app_config');
+}
+
+/**
+ * 更新应用配置
+ *
+ * @param config - 新的应用配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function updateAppConfig(config: AppConfig): ResultAsync<void, string> {
+  return invokeTauri<void>('update_app_config', { config });
+}
+
+/**
+ * 更新窗口配置
+ *
+ * @param config - 新的窗口配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function updateWindowConfig(config: WindowConfig): ResultAsync<void, string> {
+  return invokeTauri<void>('update_window_config', { config });
+}
+
+/**
+ * 更新快捷键配置
+ *
+ * @param config - 新的快捷键配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function updateShortcutConfig(config: ShortcutConfig): ResultAsync<void, string> {
+  return invokeTauri<void>('update_shortcut_config', { config });
+}
+
+/**
+ * 更新托盘配置
+ *
+ * @param config - 新的托盘配置
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function updateTrayConfig(config: TrayConfig): ResultAsync<void, string> {
+  return invokeTauri<void>('update_tray_config', { config });
+}
+
+// ==================== 错误日志相关命令 ====================
+
+/**
+ * 错误日志记录类型
+ */
+export interface ErrorLog {
+  id?: number;
+  source: string;
+  errorType: string;
+  message: string;
+  stackTrace?: string;
+  context?: string;
+  createdAt: number;
+}
+
+/**
+ * 记录前端错误日志
+ *
+ * @param errorType - 错误类型
+ * @param message - 错误消息
+ * @param stackTrace - 错误堆栈（可选）
+ * @param context - 上下文信息（可选）
+ * @returns ResultAsync<number, string> - 成功返回记录 ID
+ */
+export function logFrontendError(
+  errorType: string,
+  message: string,
+  stackTrace?: string,
+  context?: string
+): ResultAsync<number, string> {
+  return invokeTauri<number>('log_frontend_error', {
+    errorType,
+    message,
+    stackTrace,
+    context,
+  });
+}
+
+/**
+ * 获取错误日志列表
+ *
+ * @param limit - 返回记录数量限制，默认 100
+ * @returns ResultAsync<ErrorLog[], string> - 成功返回错误日志列表
+ */
+export function listErrorLogs(limit?: number): ResultAsync<ErrorLog[], string> {
+  return invokeTauri<ErrorLog[]>('list_error_logs', { limit });
+}
+
+/**
+ * 清空错误日志
+ *
+ * @returns ResultAsync<void, string> - 成功返回 void
+ */
+export function clearErrorLogs(): ResultAsync<void, string> {
+  return invokeTauri<void>('clear_error_logs');
+}
+
+/**
+ * 清理过期的错误日志
+ *
+ * @param daysToKeep - 保留天数，默认 7 天
+ * @returns ResultAsync<number, string> - 成功返回删除的记录数
+ */
+export function cleanupOldErrorLogs(
+  daysToKeep?: number
+): ResultAsync<number, string> {
+  return invokeTauri<number>('cleanup_old_error_logs', { daysToKeep });
 }
