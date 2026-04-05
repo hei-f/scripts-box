@@ -1,0 +1,17 @@
+/**
+ * 工作流编辑器常量定义
+ */
+
+/** 参数来源类型常量 */
+export const PARAM_SOURCE_TYPE = {
+  STATIC: 'static',
+  FROM_INPUT: 'fromInput',
+  FROM_NODE_OUTPUT: 'fromNodeOutput',
+} as const;
+
+/** 参数来源类型选项 */
+export const PARAM_SOURCE_OPTIONS = [
+  { value: PARAM_SOURCE_TYPE.STATIC, label: '静态值' },
+  { value: PARAM_SOURCE_TYPE.FROM_INPUT, label: '来自工作流输入' },
+  { value: PARAM_SOURCE_TYPE.FROM_NODE_OUTPUT, label: '来自节点输出' },
+];
