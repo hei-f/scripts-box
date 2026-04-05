@@ -52,19 +52,23 @@ impl super::Database {
         limit: i64,
     ) -> Result<Vec<ExecutionRecord>, AppError> {
         let sql = match script_id {
-            Some(_) => r#"
+            Some(_) => {
+                r#"
                 SELECT id, script_id, params, status, output, error, executed_at, duration_ms
                 FROM execution_history
                 WHERE script_id = ?1
                 ORDER BY executed_at DESC
                 LIMIT ?2
-            "#,
-            None => r#"
+            "#
+            }
+            None => {
+                r#"
                 SELECT id, script_id, params, status, output, error, executed_at, duration_ms
                 FROM execution_history
                 ORDER BY executed_at DESC
                 LIMIT ?1
-            "#,
+            "#
+            }
         };
 
         let mut stmt = self
@@ -73,8 +77,8 @@ impl super::Database {
             .map_err(|e| AppError::DatabaseError(format!("查询准备失败: {}", e)))?;
 
         let records = match script_id {
-            Some(sid) => {
-                stmt.query_map(params![sid, limit], |row| {
+            Some(sid) => stmt
+                .query_map(params![sid, limit], |row| {
                     Ok(ExecutionRecord {
                         id: Some(row.get(0)?),
                         script_id: row.get(1)?,
@@ -88,10 +92,9 @@ impl super::Database {
                 })
                 .map_err(|e| AppError::DatabaseError(format!("查询执行失败: {}", e)))?
                 .collect::<Result<Vec<_>, _>>()
-                .map_err(|e| AppError::DatabaseError(format!("解析记录失败: {}", e)))?
-            }
-            None => {
-                stmt.query_map(params![limit], |row| {
+                .map_err(|e| AppError::DatabaseError(format!("解析记录失败: {}", e)))?,
+            None => stmt
+                .query_map(params![limit], |row| {
                     Ok(ExecutionRecord {
                         id: Some(row.get(0)?),
                         script_id: row.get(1)?,
@@ -105,8 +108,7 @@ impl super::Database {
                 })
                 .map_err(|e| AppError::DatabaseError(format!("查询执行失败: {}", e)))?
                 .collect::<Result<Vec<_>, _>>()
-                .map_err(|e| AppError::DatabaseError(format!("解析记录失败: {}", e)))?
-            }
+                .map_err(|e| AppError::DatabaseError(format!("解析记录失败: {}", e)))?,
         };
 
         Ok(records)

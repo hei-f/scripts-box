@@ -12,7 +12,7 @@ mod workflow_store;
 mod tests;
 
 use crate::error::AppError;
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 use std::path::Path;
 
 // 重导出公共类型
@@ -94,7 +94,8 @@ impl Database {
                 description TEXT,
                 definition TEXT NOT NULL,
                 created_at INTEGER NOT NULL,
-                updated_at INTEGER NOT NULL
+                updated_at INTEGER NOT NULL,
+                node_count INTEGER DEFAULT 0
             );
 
             CREATE INDEX IF NOT EXISTS idx_workflows_created_at ON workflows(created_at);
@@ -105,9 +106,78 @@ impl Database {
             .execute_batch(sql)
             .map_err(|e| AppError::DatabaseError(format!("创建表失败: {}", e)))?;
 
+        // 数据库迁移：为已存在的 workflows 表添加 node_count 列
+        self.migrate_add_node_count()?;
+
         // 插入初始化工作流
         self.insert_initial_workflows()?;
 
         Ok(())
+    }
+
+    /// 数据库迁移：为 workflows 表添加 node_count 列
+    fn migrate_add_node_count(&self) -> Result<(), AppError> {
+        // 检查 node_count 列是否已存在
+        let column_exists: bool = self
+            .conn
+            .query_row(
+                "SELECT COUNT(*) FROM pragma_table_info('workflows') WHERE name='node_count'",
+                [],
+                |row| row.get::<_, i32>(0),
+            )
+            .unwrap_or(0)
+            > 0;
+
+        if !column_exists {
+            self.conn
+                .execute(
+                    "ALTER TABLE workflows ADD COLUMN node_count INTEGER DEFAULT 0",
+                    [],
+                )
+                .map_err(|e| AppError::DatabaseError(format!("添加 node_count 列失败: {}", e)))?;
+
+            // 更新已有工作流的 node_count：从 definition JSON 中计算节点数量
+            self.update_existing_workflow_node_counts()?;
+        }
+
+        Ok(())
+    }
+
+    /// 更新已有工作流的 node_count 值
+    ///
+    /// 从 definition JSON 中解析 nodes 数组并更新 node_count
+    fn update_existing_workflow_node_counts(&self) -> Result<(), AppError> {
+        // 获取所有工作流的 id 和 definition
+        let workflows: Vec<(String, String)> = self
+            .conn
+            .prepare("SELECT id, definition FROM workflows")
+            .map_err(|e| AppError::DatabaseError(format!("准备查询失败: {}", e)))?
+            .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+            .map_err(|e| AppError::DatabaseError(format!("查询工作流失败: {}", e)))?
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|e| AppError::DatabaseError(format!("收集结果失败: {}", e)))?;
+
+        // 更新每个工作流的 node_count
+        for (id, definition) in workflows {
+            // 从 JSON 中计算节点数量
+            let node_count = self.calculate_node_count_from_definition(&definition);
+            self.conn
+                .execute(
+                    "UPDATE workflows SET node_count = ?1 WHERE id = ?2",
+                    params![node_count, id],
+                )
+                .map_err(|e| AppError::DatabaseError(format!("更新 node_count 失败: {}", e)))?;
+        }
+
+        Ok(())
+    }
+
+    /// 从 definition JSON 中计算节点数量
+    fn calculate_node_count_from_definition(&self, definition: &str) -> i32 {
+        // 尝试解析 JSON 并计算 nodes 数组长度
+        serde_json::from_str::<serde_json::Value>(definition)
+            .ok()
+            .and_then(|json| json.get("nodes")?.as_array().map(|arr| arr.len() as i32))
+            .unwrap_or(0)
     }
 }

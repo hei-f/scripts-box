@@ -97,7 +97,8 @@ impl super::Database {
     /// # 返回
     /// 成功返回删除的记录数，失败返回 AppError
     pub fn cleanup_old_error_logs(&self, days_to_keep: i64) -> Result<usize, AppError> {
-        let cutoff_time = chrono::Utc::now().timestamp_millis() - days_to_keep * 24 * 60 * 60 * 1000;
+        let cutoff_time =
+            chrono::Utc::now().timestamp_millis() - days_to_keep * 24 * 60 * 60 * 1000;
         let sql = "DELETE FROM error_logs WHERE created_at < ?1";
 
         let rows_affected = self

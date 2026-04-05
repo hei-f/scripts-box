@@ -1,7 +1,7 @@
 //! 数据库模块测试
 
 use super::*;
-use crate::workflow::types::{NodeType, ParamSource, Workflow, WorkflowNode};
+use crate::workflow::types::{NodePosition, NodeType, ParamSource, Workflow, WorkflowNode};
 use std::collections::HashMap;
 use tempfile::tempdir;
 
@@ -111,7 +111,10 @@ fn test_delete_nonexistent_record() {
 
     let result = db.delete_history(99999);
     assert!(result.is_err());
-    assert!(matches!(result, Err(crate::error::AppError::NotFoundError(_))));
+    assert!(matches!(
+        result,
+        Err(crate::error::AppError::NotFoundError(_))
+    ));
 }
 
 #[test]
@@ -192,12 +195,23 @@ fn test_create_arithmetic_workflow() {
     assert!(workflow.description.is_some());
 
     // 验证不包含 Input 节点（新架构特性）
-    let has_input_node = workflow.nodes.iter().any(|n| n.node_type == NodeType::Input);
+    let has_input_node = workflow
+        .nodes
+        .iter()
+        .any(|n| n.node_type == NodeType::Input);
     assert!(!has_input_node, "新架构工作流不应包含 Input 节点");
 
     // 验证包含 Script 和 Output 节点
-    let script_count = workflow.nodes.iter().filter(|n| n.node_type == NodeType::Script).count();
-    let output_count = workflow.nodes.iter().filter(|n| n.node_type == NodeType::Output).count();
+    let script_count = workflow
+        .nodes
+        .iter()
+        .filter(|n| n.node_type == NodeType::Script)
+        .count();
+    let output_count = workflow
+        .nodes
+        .iter()
+        .filter(|n| n.node_type == NodeType::Output)
+        .count();
     assert_eq!(script_count, 2, "应包含 2 个 Script 节点");
     assert_eq!(output_count, 1, "应包含 1 个 Output 节点");
 
@@ -216,7 +230,9 @@ fn test_arithmetic_workflow_param_sources() {
     let workflow = Database::create_arithmetic_workflow();
 
     // 找到第一个加法节点
-    let add_node = workflow.nodes.iter()
+    let add_node = workflow
+        .nodes
+        .iter()
         .find(|n| n.id == "add_node")
         .expect("应存在 add_node");
 
@@ -254,14 +270,14 @@ fn test_workflow_crud() {
                 id: "script1".to_string(),
                 node_type: NodeType::Script,
                 script_id: Some("test_script".to_string()),
-                position: (0.0, 0.0),
+                position: NodePosition { x: 0.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
             WorkflowNode {
                 id: "output".to_string(),
                 node_type: NodeType::Output,
                 script_id: None,
-                position: (100.0, 0.0),
+                position: NodePosition { x: 100.0, y: 0.0 },
                 params_config: HashMap::new(),
             },
         ],
@@ -288,9 +304,12 @@ fn test_workflow_crud() {
     // 更新工作流
     let mut updated_workflow = workflow.clone();
     updated_workflow.name = "更新后的工作流".to_string();
-    db.update_workflow(&updated_workflow).expect("更新工作流失败");
+    db.update_workflow(&updated_workflow)
+        .expect("更新工作流失败");
 
-    let updated = db.get_workflow("test_workflow").expect("查询工作流失败")
+    let updated = db
+        .get_workflow("test_workflow")
+        .expect("查询工作流失败")
         .expect("工作流应存在");
     assert_eq!(updated.name, "更新后的工作流");
 
@@ -323,11 +342,15 @@ fn test_workflow_with_param_sources() {
     let mut params_config = HashMap::new();
     params_config.insert(
         "param1".to_string(),
-        ParamSource::Static { value: serde_json::json!(42) },
+        ParamSource::Static {
+            value: serde_json::json!(42),
+        },
     );
     params_config.insert(
         "param2".to_string(),
-        ParamSource::FromInput { param_name: "input_value".to_string() },
+        ParamSource::FromInput {
+            param_name: "input_value".to_string(),
+        },
     );
     params_config.insert(
         "param3".to_string(),
@@ -345,7 +368,7 @@ fn test_workflow_with_param_sources() {
             id: "node1".to_string(),
             node_type: NodeType::Script,
             script_id: Some("test".to_string()),
-            position: (0.0, 0.0),
+            position: NodePosition { x: 0.0, y: 0.0 },
             params_config,
         }],
         edges: vec![],
@@ -355,7 +378,9 @@ fn test_workflow_with_param_sources() {
 
     // 插入并读取，验证参数来源正确保存
     db.insert_workflow(&workflow).expect("插入工作流失败");
-    let retrieved = db.get_workflow("complex_workflow").expect("查询失败")
+    let retrieved = db
+        .get_workflow("complex_workflow")
+        .expect("查询失败")
         .expect("工作流应存在");
 
     let node = &retrieved.nodes[0];
@@ -371,7 +396,10 @@ fn test_workflow_with_param_sources() {
         _ => panic!("param2 应为 FromInput"),
     }
     match node.params_config.get("param3").unwrap() {
-        ParamSource::FromNodeOutput { node_id, output_field } => {
+        ParamSource::FromNodeOutput {
+            node_id,
+            output_field,
+        } => {
             assert_eq!(node_id, "upstream");
             assert_eq!(output_field, "result");
         }

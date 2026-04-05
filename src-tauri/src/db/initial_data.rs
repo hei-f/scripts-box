@@ -1,7 +1,7 @@
 //! 初始工作流创建逻辑
 
 use crate::script_api::{OutputDefinition, OutputType, ParamDefinition, ParamType};
-use crate::workflow::types::{NodeType, ParamSource, Workflow, WorkflowNode};
+use crate::workflow::types::{NodePosition, NodeType, ParamSource, Workflow, WorkflowNode};
 
 use std::collections::HashMap;
 
@@ -28,7 +28,7 @@ impl super::Database {
     ///
     /// 工作流流程：加10 -> 乘2 -> 输出
     /// 即：result = (input + 10) * 2
-    /// 
+    ///
     /// 新架构设计理念：
     /// - 移除显式 Input 节点
     /// - Script 节点直接通过 FromInput 参数来源获取工作流入参
@@ -74,7 +74,7 @@ impl super::Database {
             id: "add_node".to_string(),
             node_type: NodeType::Script,
             script_id: Some("add_numbers".to_string()),
-            position: (100.0, 150.0),
+            position: NodePosition { x: 100.0, y: 150.0 },
             params_config: add_params,
         };
 
@@ -101,7 +101,7 @@ impl super::Database {
             id: "multiply_node".to_string(),
             node_type: NodeType::Script,
             script_id: Some("add_numbers".to_string()),
-            position: (300.0, 150.0),
+            position: NodePosition { x: 300.0, y: 150.0 },
             params_config: multiply_params,
         };
 
@@ -120,14 +120,16 @@ impl super::Database {
             id: "output_node".to_string(),
             node_type: NodeType::Output,
             script_id: None,
-            position: (500.0, 150.0),
+            position: NodePosition { x: 500.0, y: 150.0 },
             params_config: output_params,
         };
 
         Workflow {
             id: INITIAL_WORKFLOW_ID.to_string(),
             name: "四则运算演示".to_string(),
-            description: Some("演示工作流功能：将输入的数字加10后乘2，即 result = (input + 10) * 2".to_string()),
+            description: Some(
+                "演示工作流功能：将输入的数字加10后乘2，即 result = (input + 10) * 2".to_string(),
+            ),
             nodes: vec![add_node, multiply_node, output_node],
             edges: vec![],
             input_schema,

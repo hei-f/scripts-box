@@ -21,9 +21,12 @@ impl super::Database {
         // 获取当前时间戳
         let now = chrono::Utc::now().timestamp_millis();
 
+        // 计算节点数量
+        let node_count = workflow.nodes.len() as i32;
+
         let sql = r#"
-            INSERT INTO workflows (id, name, description, definition, created_at, updated_at)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+            INSERT INTO workflows (id, name, description, definition, created_at, updated_at, node_count)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
         "#;
 
         self.conn
@@ -36,6 +39,7 @@ impl super::Database {
                     definition,
                     now,
                     now,
+                    node_count,
                 ],
             )
             .map_err(|e| AppError::DatabaseError(format!("插入工作流失败: {}", e)))?;
@@ -83,7 +87,7 @@ impl super::Database {
     /// 成功返回工作流基本信息列表，失败返回 AppError
     pub fn list_workflows(&self) -> Result<Vec<WorkflowInfo>, AppError> {
         let sql = r#"
-            SELECT id, name, description, created_at, updated_at
+            SELECT id, name, description, created_at, updated_at, node_count
             FROM workflows
             ORDER BY updated_at DESC
         "#;
@@ -101,6 +105,7 @@ impl super::Database {
                     description: row.get(2)?,
                     created_at: row.get(3)?,
                     updated_at: row.get(4)?,
+                    node_count: row.get::<_, Option<i32>>(5)?.unwrap_or(0) as usize,
                 })
             })
             .map_err(|e| AppError::DatabaseError(format!("查询执行失败: {}", e)))?
@@ -125,10 +130,13 @@ impl super::Database {
         // 获取当前时间戳
         let now = chrono::Utc::now().timestamp_millis();
 
+        // 计算节点数量
+        let node_count = workflow.nodes.len() as i32;
+
         let sql = r#"
             UPDATE workflows
-            SET name = ?1, description = ?2, definition = ?3, updated_at = ?4
-            WHERE id = ?5
+            SET name = ?1, description = ?2, definition = ?3, updated_at = ?4, node_count = ?5
+            WHERE id = ?6
         "#;
 
         let rows_affected = self
@@ -140,6 +148,7 @@ impl super::Database {
                     workflow.description,
                     definition,
                     now,
+                    node_count,
                     workflow.id,
                 ],
             )
@@ -171,10 +180,7 @@ impl super::Database {
             .map_err(|e| AppError::DatabaseError(format!("删除工作流失败: {}", e)))?;
 
         if rows_affected == 0 {
-            return Err(AppError::NotFoundError(format!(
-                "工作流不存在: id={}",
-                id
-            )));
+            return Err(AppError::NotFoundError(format!("工作流不存在: id={}", id)));
         }
 
         Ok(())
